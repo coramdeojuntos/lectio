@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Experimentando a Dios juntos</title>
+<script>
+/* Las direcciones de la primera versión (#dia1, #grupo, #semana-…) siguen llevando a la serie de los atributos */
+(function () {
+  var h = location.hash.slice(1);
+  if (!h) return;
+  var m = h.match(/^dia(\d)$/);
+  var ruta = m ? '#semana-1/dia-' + m[1] : h === 'grupo' ? '#semana-1/grupo' : '#' + h;
+  location.replace('es/atributos/' + (location.protocol === 'file:' ? 'index.html' : '') + ruta);
+})();
+</script>
+<link rel="apple-touch-icon" href="recursos/icono-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="app/estilo.css?v=7">
+</head>
+<body>
+<main id="app">
+  <div class="contenido">
+    <header class="encabezado">
+      <h1>Experimentando a Dios juntos</h1>
+      <p class="curso">Aprender teología meditando y orando la Palabra, en silencio y en comunidad</p>
+    </header>
+    <section>
+      <h2>Las series</h2>
+      <!-- Cada serie: su dirección, cuántas semanas tiene y su clave de notas (la misma "clave" de su serie.js).
+           "pronto" se quita cuando la serie publique su primera semana. -->
+      <ol class="lista" id="series">
+        <li><a class="fila" href="es/atributos/" data-clave="atributos" data-semanas="27">
+          <span class="ref">Experimentando los atributos de Dios juntos<small class="termino">27 semanas · Quién es Dios</small></span>
+          <span class="estado"></span></a></li>
+        <li><a class="fila" href="es/salvacion/" data-clave="salvacion" data-semanas="19">
+          <span class="ref">Experimentando la salvación de Dios juntos<small class="termino">19 semanas · Lo que Dios hace para salvarnos</small></span>
+          <span class="estado"></span></a></li>
+        <li><a class="fila" href="es/adviento/" data-clave="adviento" data-semanas="4">
+          <span class="ref">Experimentando el Adviento juntos<small class="termino">4 semanas · Esperar a Jesús, que vino y volverá</small></span>
+          <span class="estado"></span></a></li>
+      </ol>
+    </section>
+    <footer class="pie">
+      <p>Tus notas se guardan solo en este dispositivo.</p>
+    </footer>
+  </div>
+</main>
+<script>
+/* Junto a cada serie, cuántas semanas terminaste (se guardan en este dispositivo, con la clave de cada serie) */
+document.querySelectorAll('#series .fila').forEach(function (a) {
+  if (a.hasAttribute('data-pronto')) return;
+  var clave = a.getAttribute('data-clave'), total = +a.getAttribute('data-semanas'), hechas = 0;
+  try {
+    for (var n = 1; n <= total; n++) {
+      var dias = 0;
+      for (var d = 1; d <= 5; d++) if (localStorage.getItem(clave + ':s' + n + ':d' + d + ':hecho') === 'true') dias++;
+      if (dias === 5) hechas++;
+    }
+  } catch (e) {}
+  if (hechas) a.querySelector('.estado').textContent = hechas + ' de ' + total;
+});
+if (location.protocol === 'file:') document.querySelectorAll('#series .fila').forEach(function (a) { a.href += 'index.html'; });
+</script>
+</body>
+</html>
