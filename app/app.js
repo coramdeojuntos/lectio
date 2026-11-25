@@ -216,13 +216,15 @@ function siguientePaso() {
 }
 
 /* Agregar a la pantalla de inicio: los pasos del teléfono que se está usando, cerca del principio hasta que se haga o se descarte */
-const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+// Android primero (2026-11-25): la vista de teléfono de Chrome en una computadora dice «Android» y también tiene pantalla táctil
+// con plataforma «MacIntel», así que la prueba del iPad la tomaba por iPhone. Un iPhone o iPad de verdad nunca dice «Android».
 const esAndroid = /Android/i.test(navigator.userAgent);
+const esIOS = !esAndroid && (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 function pasosInicio() {
   const lista = pasos => `<ol class="pasos-inicio">${pasos.map(p =>
     `<li>${esc(p).replace('{compartir}', `<span class="icono-en-linea" role="img" aria-label="${esc(T.compartir)}">${ICONO.compartir}</span>`)}</li>`).join('')}</ol>`;
-  if (esIOS) return lista(T.pasosIOS) + `<p class="tenue">${esc(T.avisoIOSNota)}</p>`;
   if (esAndroid) return lista(T.pasosAndroid);
+  if (esIOS) return lista(T.pasosIOS) + `<p class="tenue">${esc(T.avisoIOSNota)}</p>`;
   return `<h4>iPhone</h4>${lista(T.pasosIOS)}<h4>Android</h4>${lista(T.pasosAndroid)}<p class="tenue">${esc(T.avisoIOSNota)}</p>`;
 }
 function avisoInicio() {
