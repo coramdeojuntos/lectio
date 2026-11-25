@@ -45,7 +45,7 @@ window.SERIE = {
       "numero": 2,
       "titulo": "The Prince of Peace Is Born to Us",
       "termino": "peace",
-      "disponible": false
+      "disponible": true
     },
     {
       "numero": 3,
