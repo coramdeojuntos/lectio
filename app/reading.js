@@ -3,26 +3,41 @@
      <html lang="es" data-series="semana-santa">
      <script src="reading.js"></script>
    The page starts from the reader's device setting. Tapping the switch remembers the choice
-   in this browser, labeled with the series ("semana-santa:theme"), as the library requires.
+   once for the whole library ("biblioteca:theme"), so it follows the reader to every page and
+   series. (Decided 2026-11-25: reading preferences are the reader's, not the series'. A choice
+   saved before then under the series' own name, like "semana-santa:theme", is carried over once.)
    Button: <button class="theme-toggle" type="button" data-theme-toggle></button>
    Its words follow the page language (es: Claro / Oscuro; en: Light / Dark).
    Pages that redraw themselves can add these buttons at any time; they work the same.
    Text size: <button class="text-size" type="button" data-text-size>Aa</button>
    Each tap makes the text larger (normal, larger, largest), then back to normal;
-   remembered as "<series>:text-size".
+   remembered for the whole library as "biblioteca:text-size".
    Print: <button class="print-button" type="button" data-print>Print this day</button>
    (the page writes its own words: "Imprimir este día", "Print this reading"...). reading.js adds a
    printer icon; on phones only the icon shows, and the words stay as the button's label. */
 (function () {
   var html = document.documentElement;
   var series = html.getAttribute('data-series') || 'reading';
-  var KEY = series + ':theme';
-  try { var saved = localStorage.getItem(KEY); if (saved === 'light' || saved === 'dark') html.setAttribute('data-theme', saved); } catch (e) {}
+  var KEY = 'biblioteca:theme', SIZE_KEY = 'biblioteca:text-size';
+  var SIZES = [1, 1.15, 1.3], size = 0;
 
-  var SIZES = [1, 1.15, 1.3], SIZE_KEY = series + ':text-size', size = 0;
-  try { size = parseInt(localStorage.getItem(SIZE_KEY), 10) || 0; } catch (e) {}
-  if (!(size >= 0 && size < SIZES.length)) size = 0;
-  html.style.setProperty('--text-scale', SIZES[size]);
+  // read a library-wide choice; if there is none yet, carry over this series' old one
+  function read(key, old) {
+    try {
+      var v = localStorage.getItem(key);
+      if (v === null) { v = localStorage.getItem(old); if (v !== null) localStorage.setItem(key, v); }
+      return v;
+    } catch (e) { return null; }
+  }
+  // apply the saved choices (on load, on coming back with the Back button, and when another tab changes them)
+  function load() {
+    var saved = read(KEY, series + ':theme');
+    if (saved === 'light' || saved === 'dark') html.setAttribute('data-theme', saved); else html.removeAttribute('data-theme');
+    size = parseInt(read(SIZE_KEY, series + ':text-size'), 10) || 0;
+    if (!(size >= 0 && size < SIZES.length)) size = 0;
+    html.style.setProperty('--text-scale', SIZES[size]);
+  }
+  load();
 
   var es = (html.lang || '').toLowerCase().indexOf('es') === 0;
   var WORDS = es ? { light: 'Claro', dark: 'Oscuro', toLight: 'Cambiar a modo claro', toDark: 'Cambiar a modo oscuro',
@@ -85,6 +100,10 @@
         list.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.querySelectorAll) setUp(n.parentNode || n); }); });
       }).observe(document.body, { childList: true, subtree: true });
     } catch (e) {}
+    // a page shown again with the Back button, or a choice made in another tab, picks up the latest choice
+    var refresh = function () { load(); setUp(document); };
+    window.addEventListener('pageshow', function (e) { if (e.persisted) refresh(); });
+    window.addEventListener('storage', function (e) { if (e.key === KEY || e.key === SIZE_KEY) refresh(); });
     // follow the device if it changes and the reader hasn't chosen
     try {
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {

@@ -33,7 +33,7 @@ function borrarTodo() {
 const enPantallaInicio = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
 /* Copia de seguridad: un archivo con todo lo guardado, para llevarlo a otro dispositivo o navegador */
-const CLAVE_VALIDA = /^(s\d+:.+|escala|color|aviso-inicio|ultimo)$/;
+const CLAVE_VALIDA = /^(s\d+:.+|color|aviso-inicio|ultimo)$/;
 function datosGuardados() {
   const datos = {};
   // Solo lo de la app (notas, marcas, avances…): reading.js guarda Claro/Oscuro con la misma etiqueta de la serie,
@@ -185,7 +185,7 @@ function barra(titulo, ruta, etiqueta) {
   const destino = ruta.startsWith('../') ? `data-accion="salir" data-href="${ruta}"` : `data-accion="ir" data-ruta="${ruta}"`;
   return `<div class="topbar"><div class="topbar-inner">
     <button class="atras" ${destino} aria-label="${esc(etiqueta)}"><b class="flecha" aria-hidden="true">‹</b><span>${esc(titulo)}</span></button>
-    <button class="text-size" data-accion="tamano" aria-label="${esc(T.tamano)}">Aa</button>
+    <button class="text-size" type="button" data-text-size>Aa</button>
     ${NUM && estado.vista === 'semana' ? `<button class="print-button" data-accion="ir" data-ruta="${rutaSemana('/imprimir')}" aria-label="${esc(T.imprimirSemana)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg><span class="word">${esc(T.imprimirSemana)}</span></button>` : ''}
     <button class="theme-toggle" type="button" data-theme-toggle></button>
   </div></div>`;
@@ -1148,9 +1148,24 @@ async function desdeUrl() {
 }
 window.addEventListener('hashchange', desdeUrl);
 
-function aplicarEscala() {
-  document.documentElement.style.setProperty('--escala', ESCALAS[leer('escala', 0)] || 1);
-  document.documentElement.style.setProperty('--text-scale', ESCALAS[leer('escala', 0)] || 1);
+// Aa y Claro/Oscuro son del lector, no de la serie (2026-11-25): reading.js los guarda una sola vez para toda la biblioteca
+// («biblioteca:text-size», «biblioteca:theme»), y el tamaño de todo el texto sigue a --text-scale.
+// Una sola vez, el tamaño que el lector tenía guardado en esta serie («escala») pasa a la biblioteca, para que nadie lo pierda.
+function llevarEscala() {
+  let vieja = null;
+  try { vieja = localStorage.getItem(PREFIJO + 'escala'); } catch (e) {}
+  if (vieja === null) return;
+  try {
+    const n = parseInt(vieja, 10);
+    if (localStorage.getItem('biblioteca:text-size') === null && n > 0 && n < ESCALAS.length) {
+      localStorage.setItem('biblioteca:text-size', String(n));
+      // reading.js ya leyó el tamaño al cargar: se le avisa como si viniera de otra pestaña, para que vuelva a leerlo
+      const avisar = () => setTimeout(() => window.dispatchEvent(new StorageEvent('storage', { key: 'biblioteca:text-size' })));
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', avisar); else avisar();
+    }
+    localStorage.removeItem(PREFIJO + 'escala');
+  } catch (e) {}
+  delete memoria.escala;
 }
 
 app.addEventListener('click', ev => {
@@ -1203,12 +1218,8 @@ app.addEventListener('click', ev => {
     pintarSilencio();
   } else if (accion === 'iniciar') iniciarSilencio();
   else if (accion === 'detener') terminarSilencio(false);
-  else if (accion === 'tamano') {
-    guardar('escala', (leer('escala', 0) + 1) % ESCALAS.length);
-    aplicarEscala();
-    ajustarAltos();
-  } else if (accion === 'borrar') {
-    if (b.dataset.confirmar) { borrarTodo(); aplicarEscala(); pintar(); }
+  else if (accion === 'borrar') {
+    if (b.dataset.confirmar) { borrarTodo(); pintar(); }
     else { b.dataset.confirmar = '1'; b.textContent = T.borrarConfirmar; }
   } else if (accion === 'trad-grupo') {
     const i = +b.dataset.p, t = b.dataset.trad, c = b.closest('.version').querySelector('.escritura');
@@ -1254,12 +1265,16 @@ app.addEventListener('change', async ev => {
   const mensaje = await importarCopia(ev.target.files[0]);
   ev.target.value = '';
   if (!mensaje) return;
-  aplicarEscala();
   estado.aNotas = true;
   pintar();
   const s = document.getElementById('estado-copia');
   if (s) { s.textContent = mensaje; s.scrollIntoView({ block: 'center' }); }
 });
 
-aplicarEscala();
+// cuando cambia el tamaño del texto (Aa aquí, en otra pestaña, o al volver con Atrás), las cajas de escribir se ajustan
+document.addEventListener('click', ev => { if (ev.target.closest && ev.target.closest('[data-text-size]')) setTimeout(ajustarAltos); });
+window.addEventListener('storage', () => setTimeout(ajustarAltos, 50));
+window.addEventListener('pageshow', ev => { if (ev.persisted) setTimeout(ajustarAltos, 50); });
+
+llevarEscala();
 desdeUrl();

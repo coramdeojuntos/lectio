@@ -7,7 +7,7 @@
   --rubrica: var(--accent-text); --lapis: var(--accent-text); --sobre-lapis: var(--bg); --oro: var(--accent-mark);
   --t-cruz: #1d2330; --t-una-vez: #1b7f66; --t-cada-dia: #5e55c0; --t-para-siempre: #b98a1f;
   --m0: #ffd84d; --m0l: #c99700; --m1: #a9e27a; --m1l: #4e9a2a; --m2: #9dd0f7; --m2l: #2b7cc4; --m3: #f8afc9; --m3l: #cf3f78;
-  --opacidad-resaltado: .7; --escala: 1;
+  --opacidad-resaltado: .7;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --t-cruz: #e8e6de; --t-una-vez: #5cc3a3; --t-cada-dia: #a29bf0; --t-para-siempre: #d9b35a;
@@ -18,8 +18,9 @@
   --m0: #d9b02a; --m0l: #f0cc4e; --m1: #6fb044; --m1l: #9fdb72; --m2: #4b93cf; --m2l: #8cc6f2; --m3: #c9638c; --m3l: #f09cbd;
   --opacidad-resaltado: .4; }
 * { box-sizing: border-box; }
-html { font-size: calc(100% * var(--escala)); -webkit-text-size-adjust: 100%; }
-@media (min-width: 768px) { html { font-size: calc(117.65% * var(--escala)); } }
+/* the reader's Aa (reading.js, the same for the whole library) sizes everything: --text-scale */
+html { font-size: calc(100% * var(--text-scale, 1)); -webkit-text-size-adjust: 100%; }
+@media (min-width: 768px) { html { font-size: calc(117.65% * var(--text-scale, 1)); } }
 body { font-family: var(--sans); font-size: 1.0625rem; line-height: 1.5; }
 #app { max-width: 40rem; margin: 0 auto; min-height: 100vh; overflow-x: clip; }
 [hidden] { display: none !important; }
