@@ -33,12 +33,14 @@ function borrarTodo() {
 const enPantallaInicio = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 
 /* Copia de seguridad: un archivo con todo lo guardado, para llevarlo a otro dispositivo o navegador */
-const CLAVE_VALIDA = /^(s\d+:.+|escala|color|aviso-inicio)$/;
+const CLAVE_VALIDA = /^(s\d+:.+|escala|color|aviso-inicio|ultimo)$/;
 function datosGuardados() {
   const datos = {};
+  // Solo lo de la app (notas, marcas, avances…): reading.js guarda Claro/Oscuro con la misma etiqueta de la serie,
+  // como texto simple, y no va en la copia. Cada clave por separado, para que una que falle no corte la copia.
   try {
-    Object.keys(localStorage).filter(k => k.startsWith(PREFIJO)).forEach(k => {
-      datos[k.slice(PREFIJO.length)] = JSON.parse(localStorage.getItem(k));
+    Object.keys(localStorage).filter(k => k.startsWith(PREFIJO) && CLAVE_VALIDA.test(k.slice(PREFIJO.length))).forEach(k => {
+      try { datos[k.slice(PREFIJO.length)] = JSON.parse(localStorage.getItem(k)); } catch (e) {}
     });
   } catch (e) {}
   Object.assign(datos, memoria);
@@ -178,30 +180,39 @@ function escritura(lineas) {
 const estado = { vista: 'serie', dia: 1, paso: 0, traduccion: {}, minutos: {}, herramienta: null, panel: false, tradGrupo: {}, anterior: '', aNotas: false, aviso: '' };
 
 /* Vistas */
+// ruta: una vista de la app; o, si empieza con «../», una página fuera de la serie (la lista de series)
 function barra(titulo, ruta, etiqueta) {
-  return `<div class="barra">
-    <button class="icono volver" data-accion="ir" data-ruta="${ruta}" aria-label="${esc(etiqueta)}">${ICONO.volver}</button>
-    <span class="titulo">${esc(titulo)}</span>
-    <button class="icono aa" data-accion="tamano" aria-label="${esc(T.tamano)}">Aa</button>
-  </div>`;
+  const destino = ruta.startsWith('../') ? `data-accion="salir" data-href="${ruta}"` : `data-accion="ir" data-ruta="${ruta}"`;
+  return `<div class="topbar"><div class="topbar-inner">
+    <button class="atras" ${destino} aria-label="${esc(etiqueta)}"><b class="flecha" aria-hidden="true">‹</b><span>${esc(titulo)}</span></button>
+    <button class="text-size" data-accion="tamano" aria-label="${esc(T.tamano)}">Aa</button>
+    ${NUM && estado.vista === 'semana' ? `<button class="print-button" data-accion="ir" data-ruta="${rutaSemana('/imprimir')}" aria-label="${esc(T.imprimirSemana)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg><span class="word">${esc(T.imprimirSemana)}</span></button>` : ''}
+    <button class="theme-toggle" type="button" data-theme-toggle></button>
+  </div></div>`;
 }
 const rutaSemana = (sufijo = '') => `semana-${NUM}${sufijo}`;
 
 // a dónde lleva «Continuar»: el primer día sin terminar de las semanas disponibles
+// «Continuar» retoma donde el lector se quedó (2026-11-24): el primer día sin terminar después del último día que terminó
+// («ultimo»). Un día que se saltó no lo hace volver atrás: sigue sin ✓ en su semana, que dice «En curso».
+// Si no hay nada sin terminar después, va al primer día pendiente de la serie. Quien empezó antes de este cambio
+// no tiene «ultimo»: se toma el día terminado más avanzado.
 function siguientePaso() {
   const disponibles = SERIE.semanas.filter(s => s.disponible);
-  const empezado = disponibles.some(s => estadoSemana(s.numero));
-  for (const s of disponibles) {
-    for (let d = 1; d <= diasDe(s.numero); d++) {
-      if (!estaHecho(d, s.numero)) {
-        return empezado
-          ? { texto: T.continuar, detalle: T.continuarDetalle(s.numero, d, s.titulo), ruta: `semana-${s.numero}/dia-${d}` }
-          : { texto: T.comenzar, detalle: T.comenzarDetalle(s.numero, s.titulo), ruta: `semana-${s.numero}` };
-      }
-    }
+  const dias = [];
+  disponibles.forEach(s => { for (let d = 1; d <= diasDe(s.numero); d++) dias.push({ s: s.numero, d, titulo: s.titulo, hecho: estaHecho(d, s.numero) }); });
+  if (!dias.length) return null;
+  if (!dias.some(x => x.hecho)) {
+    const p = disponibles[0];
+    return { texto: T.comenzar, detalle: T.comenzarDetalle(p.numero, p.titulo), ruta: `semana-${p.numero}` };
   }
-  const u = disponibles[disponibles.length - 1];
-  return u ? { texto: T.repasar, detalle: T.comenzarDetalle(u.numero, u.titulo), ruta: `semana-${u.numero}` } : null;
+  const u = leer('ultimo', null);
+  let i = u ? dias.findIndex(x => x.s === u.s && x.d === u.d && x.hecho) : -1;
+  if (i < 0) i = dias.map(x => x.hecho).lastIndexOf(true);
+  const sig = dias.find((x, j) => j > i && !x.hecho) || dias.find(x => !x.hecho);
+  if (sig) return { texto: T.continuar, detalle: T.continuarDetalle(sig.s, sig.d, sig.titulo), ruta: `semana-${sig.s}/dia-${sig.d}` };
+  const ult = disponibles[disponibles.length - 1];
+  return { texto: T.repasar, detalle: T.comenzarDetalle(ult.numero, ult.titulo), ruta: `semana-${ult.numero}` };
 }
 
 /* Agregar a la pantalla de inicio: los pasos del teléfono que se está usando, cerca del principio hasta que se haga o se descarte */
@@ -224,22 +235,25 @@ function avisoInicio() {
     </section>`;
 }
 
+// «Tus notas» (2026-11-24): primero qué se guarda y dónde, luego una sola acción clara (guardar una copia),
+// restaurar para quien cambió de teléfono, la pantalla de inicio solo en teléfonos, y al final, discreto, borrar todo.
 function seccionNotas() {
-  // desde la pantalla de inicio ya está hecho; si no, los pasos quedan a mano, plegados
+  // desde la pantalla de inicio ya está hecho; en un teléfono, los pasos quedan a mano, plegados; en una computadora, nada
   const ayuda = enPantallaInicio()
     ? `<p class="hecho-inicio">${ICONO.check}<span>${esc(T.enInicio)}</span></p>`
-    : `<details class="ayuda-inicio"><summary>${esc(T.avisoEnlace)}</summary><p>${esc(T.avisoPorQue)}</p>${pasosInicio()}</details>`;
+    : (esIOS || esAndroid) ? `<details class="ayuda-inicio"><summary>${esc(T.avisoEnlace)}</summary><p>${esc(T.avisoPorQue)}</p>${pasosInicio()}</details>` : '';
   return `<section class="notas-serie" id="notas">
       <h2>${esc(T.tusNotas)}</h2>
-      ${ayuda}
-      <p class="tenue pequeno">${esc(T.notasDispositivo)}</p>
-      <div class="enlaces">
-        <button class="enlace" data-accion="exportar">${esc(T.guardarCopia)}</button>
-        <button class="enlace" data-accion="importar">${esc(T.restaurarCopia)}</button>
+      <p class="notas-explica">${esc(T.notasDispositivo)}</p>
+      <div class="notas-acciones">
+        <button class="boton secundario" data-accion="exportar">${esc(T.guardarCopia)}</button>
+        <p class="copia-explica">${esc(T.copiaExplica)}</p>
+        <p class="restaurar">${esc(T.restaurarPregunta)} <button class="enlace en-linea" data-accion="importar">${esc(T.restaurarCopia)}</button></p>
         <input type="file" id="archivo-copia" accept=".json,application/json" hidden>
         <p role="status" id="estado-copia"></p>
-        <button class="enlace" data-accion="borrar" id="borrar">${esc(T.borrarTodo)}</button>
       </div>
+      ${ayuda}
+      <button class="enlace borrar-todo" data-accion="borrar" id="borrar">${esc(T.borrarTodo)}</button>
     </section>`;
 }
 
@@ -258,6 +272,7 @@ function vistaSerie() {
         <ol class="lista semanas">${SERIE.semanas.filter(s => s.numero >= t.desde && s.numero <= t.hasta).map(fila).join('')}</ol>`).join('')
     : `<ol class="lista semanas">${SERIE.semanas.map(fila).join('')}</ol>`;
   return `
+    <div class="contenido barra-serie">${barra(T.todasSeries, '../../', T.todasSeries)}</div>
     ${SERIE.portada ? `<figure class="portada"><img src="${esc(SERIE.portada.src)}" alt="${esc(SERIE.portada.alt)}" onerror="this.parentNode.hidden=true"></figure>` : ''}
     <div class="contenido">
       <header class="encabezado">
@@ -274,13 +289,16 @@ function vistaSerie() {
         <ol class="pasos">${SERIE.comoFunciona.map(t => `<li>${enfasis(t)}</li>`).join('')}</ol>
         <button class="enlace" data-accion="ir" data-ruta="guia">${esc(T.comoMeditar)}</button>
       </section>
+      <section class="dos-formas">
+        <h2>${esc(T.dosFormas)}</h2>
+        ${[T.enPantalla, T.enPapel].map(([tit, txt]) => `<p><b>${esc(tit)}</b> ${esc(txt)}</p>`).join('')}
+      </section>
       <section>
         <h2>${esc(T.lasSemanas(TOTAL))}</h2>
         ${semanas}
       </section>
       ${seccionNotas()}
       <footer class="pie">
-        <button class="enlace" data-accion="tamano">${esc(T.tamano)}</button>
         <p>${SERIE.creditos.map(esc).join('<br>')}</p>
       </footer>
     </div>`;
@@ -312,14 +330,14 @@ function vistaSemana() {
         <h2>${esc(T.estaSemana)}</h2>
         <ol class="lista">${filas}</ol>
       </section>
-      <section>
-        <button class="fila" data-accion="ir" data-ruta="${rutaSemana('/grupo')}" style="border-block:1px solid var(--linea)">
-          <span class="ref">${esc(SERIE.respuesta.titulo)}</span><span class="estado">${esc(T.preguntasN(SERIE.preguntas.length))}</span>
-        </button>
+      <section class="destino">
+        <p class="destino-etiqueta">Al final de la semana</p>
+        <h2 class="destino-titulo">${esc(SERIE.respuesta.titulo)}</h2>
+        <p class="destino-texto">${esc(T.preguntasN(SERIE.preguntas.length))} para conversar con tu grupo sobre lo que Dios te habló esta semana.</p>
+        <button class="boton principal" data-accion="ir" data-ruta="${rutaSemana('/grupo')}">${esc(T.verPreguntas)}</button>
       </section>
       <footer class="pie">
-        <button class="enlace" data-accion="ir" data-ruta="${rutaSemana('/imprimir')}">${esc(T.imprimirSemana)}</button>
-        <button class="enlace" data-accion="ir" data-ruta="guia">${esc(T.comoMeditar)}</button>
+        <p>${esc(T.semanaPapel)}</p>
         <p>${esc(T.notasSemana)} <button class="enlace en-linea" data-accion="ir-notas">${esc(T.notasSemanaEnlace)}</button></p>
         <p>${SERIE.creditos.map(esc).join('<br>')}</p>
       </footer>
@@ -328,7 +346,7 @@ function vistaSemana() {
 
 function barraDia(detalle) {
   const p = SEM.pasajes[estado.dia - 1];
-  return barra(`${T.dia(estado.dia)} · ${detalle || p.ref}`, rutaSemana(), T.volverSemana);
+  return barra(`${T.semana(NUM)} · ${SEM.titulo}`, rutaSemana(), T.volverSemana);
 }
 
 function vistaPreparacion() {
@@ -336,9 +354,10 @@ function vistaPreparacion() {
   return `<div class="contenido">
     ${barraDia()}
     <header class="encabezado" style="gap:.25rem">
-      <p class="atributo">${esc(SEM.titulo)}</p>
+      <p class="atributo">${esc(SEM.titulo)} · ${esc(T.dia(estado.dia))}</p>
       <h1>${esc(p.ref)}</h1>
     </header>
+    <div class="hilos" aria-hidden="true"><span class="lleno"></span><span></span><span></span><span></span></div>
     <p class="guia" style="border-top:0;padding-top:0;font-size:1.375rem">${esc(SERIE.preparacion)}</p>
     <p class="tenue">${esc(T.prepNota)}</p>
     <nav class="navegacion sola"><button class="boton principal" data-accion="paso" data-paso="1">${esc(T.comenzar)}</button></nav>
@@ -351,21 +370,26 @@ function vistaLectura() {
   const p = SEM.pasajes[estado.dia - 1];
   const trad = estado.traduccion[i] || lec.traduccion;
   const nota = leer(claveNota(estado.dia, i + 1), '');
-  const hilos = SERIE.lecturas.map((_, n) => `<span${n <= i ? ' class="lleno"' : ''}></span>`).join('');
+  const hilos = '<span class="lleno"></span>' + SERIE.lecturas.map((_, n) => `<span${n <= i ? ' class="lleno"' : ''}></span>`).join('');
   const botones = TRADUCCIONES.map(t =>
     `<button data-accion="traduccion" data-trad="${t}" aria-pressed="${t === trad}">${t}</button>`).join('');
   const siguiente = i < SERIE.lecturas.length - 1 ? SERIE.lecturas[i + 1].nombre : T.terminar;
   return `<div class="contenido">
     ${barraDia(lec.nombre)}
+    <header class="encabezado">
+      <p class="atributo">${esc(SEM.titulo)} · ${esc(T.dia(estado.dia))}</p><h1>${esc(p.ref)}</h1>
+    </header>
     <div class="hilos" aria-hidden="true">${hilos}</div>
-    <div class="cabeza-lectura">
-      <div><p class="atributo">${esc(SEM.titulo)}</p><h1>${esc(p.ref)}</h1></div>
+    <p class="atributo paso-nombre">${esc(lec.nombre)}</p>
+    <div class="fila-lectura">
       <div class="traducciones" role="group" aria-label="${esc(T.traduccion)}">${botones}</div>
+      ${vistaMarcador()}
     </div>
-    ${vistaMarcador()}
+    <p class="trans-nombre">${esc(({NVI: 'Nueva Versión Internacional', NTV: 'Nueva Traducción Viviente', DHH: 'Dios Habla Hoy'})[trad] || trad)}</p>
     <article class="escritura" id="escritura" data-marcas="${claveMarcas(estado.dia, trad)}">${escritura(p[trad])}</article>
     <ol class="notas-pie" aria-label="${esc(T.notasEnPasaje)}"></ol>
-    <p class="guia">${esc(lec.guia)}</p>
+    <p class="guia"><b>${esc(lec.duracion)}</b>${esc(lec.guia)}</p>
+    <div class="acciones">
     <section class="silencio" id="silencio" aria-live="polite"></section>
     <details${nota ? ' open' : ''}>
       <summary>${esc(T.escribirNota)}</summary>
@@ -373,6 +397,7 @@ function vistaLectura() {
       <textarea id="nota" data-clave="${claveNota(estado.dia, i + 1)}">${esc(nota)}</textarea>
       <p class="nota-privada">${esc(T.notaPrivada)}</p>
     </details>
+    </div>
     <nav class="navegacion">
       <button class="boton secundario" data-accion="paso" data-paso="${estado.paso - 1}">${esc(T.atras)}</button>
       <button class="boton principal" data-accion="paso" data-paso="${estado.paso + 1}">${esc(siguiente)}</button>
@@ -410,7 +435,9 @@ function botonesGrupo(i, trad) {
 
 function vistaFin() {
   const notas = notasDelDia(estado.dia) + notasPieDelDia(estado.dia);
-  const sig = siguienteDia();
+  // el siguiente día sin terminar después de este; si no hay, el primero que falte en la semana (como «Continuar»)
+  const pendientes = SEM.pasajes.map((_, i) => i + 1).filter(d => !estaHecho(d));
+  const sig = pendientes.find(d => d > estado.dia) || pendientes[0] || 0;
   return `<div class="contenido">
     ${barraDia()}
     <header class="encabezado">
@@ -419,7 +446,8 @@ function vistaFin() {
     </header>
     ${notas ? `<section><h2 style="margin-bottom:.75rem">${esc(T.tusNotasHoy)}</h2><div class="mis-notas">${notas}</div></section>` : ''}
     <p class="tenue">${sig ? esc(T.sigueDia(sig, SEM.pasajes[sig - 1].ref)) : esc(T.terminaste(SERIE.respuesta.titulo))}</p>
-    <nav class="navegacion sola"><button class="boton principal" data-accion="ir" data-ruta="${rutaSemana(sig ? '' : '/grupo')}">${esc(sig ? T.volverSemana : T.verPreguntas)}</button></nav>
+    <nav class="navegacion sola"><button class="boton principal" data-accion="ir" data-ruta="${rutaSemana(sig ? `/dia-${sig}` : '/grupo')}">${esc(sig ? T.irDia(sig) : T.verPreguntas)}</button>
+      <button class="enlace" data-accion="ir" data-ruta="${rutaSemana()}">${esc(T.volverSemana)}</button></nav>
   </div>`;
 }
 
@@ -613,7 +641,9 @@ function ajustarImpresion() {
 }
 
 /* Marcas sobre la Escritura: todas se guardan como palabras (de la palabra a hasta la b), así siguen al texto en cualquier pantalla, tamaño o vista */
-const HERRAMIENTAS = [['r', ICONO.resaltar], ['l', ICONO.linea], ['e', ICONO.encerrar], ['w', ICONO.flecha], ['n', ICONO.nota], ['b', ICONO.borrar]]
+// Cuatro herramientas (2026-11-24). Encerrar (e) y Flecha (w) ya no se ofrecen, pero se siguen dibujando y borrando:
+// los lectores que ya las usaron no pierden sus marcas (por eso siguen en TIPOS).
+const HERRAMIENTAS = [['r', ICONO.resaltar], ['l', ICONO.linea], ['n', ICONO.nota], ['b', ICONO.borrar]]
   .map(([h, icono]) => [h, T.herramientas[h][0], icono, T.herramientas[h][1]]);
 const TIPOS = new Set(['r', 's', 'v', 'e', 'w', 'n']);
 const COLORES = T.colores;
@@ -758,6 +788,12 @@ function ponerLlamadas(c, lista) {
 function ajustarAlto(t) {
   t.style.height = 'auto';
   t.style.height = `${t.scrollHeight + 2}px`;
+}
+// Todas las cajas donde se escribe crecen con el texto (2026-11-24): al abrir la vista, al escribir,
+// al cambiar el tamaño del texto (Aa) o el ancho de la ventana, y al abrir «Escribir una nota».
+// Las que están ocultas (dentro de un <details> cerrado) esperan a verse.
+function ajustarAltos() {
+  app.querySelectorAll('textarea').forEach(t => { if (t.offsetParent) ajustarAlto(t); });
 }
 function pintarNotasPie(c, lista) {
   const ol = c.nextElementSibling;
@@ -981,7 +1017,6 @@ function pintarSilencio() {
         `<button data-accion="minutos" data-min="${m}" aria-pressed="${m === min}">${esc(T.minutos(m))}</button>`).join('')}</div>`
     : '';
   caja.innerHTML = `
-    <p class="tenue pequeno">${esc(lec.duracion)}</p>
     <div class="fila-reloj">
       ${opciones}
       <button class="boton secundario" data-accion="iniciar" style="flex:1">${esc(T.iniciarSilencio)}${lec.minutos.length > 1 ? '' : ` (${esc(T.minutos(min))})`}</button>
@@ -1068,6 +1103,7 @@ function pintar() {
   estado.aviso = '';
   pintarSilencio();
   prepararMarcas();
+  ajustarAltos();
   if (estado.vista === 'imprimir') (document.fonts ? document.fonts.ready : Promise.resolve()).then(ajustarImpresion);
   const notas = estado.aNotas && document.getElementById('notas');
   estado.aNotas = false;
@@ -1107,6 +1143,7 @@ window.addEventListener('hashchange', desdeUrl);
 
 function aplicarEscala() {
   document.documentElement.style.setProperty('--escala', ESCALAS[leer('escala', 0)] || 1);
+  document.documentElement.style.setProperty('--text-scale', ESCALAS[leer('escala', 0)] || 1);
 }
 
 app.addEventListener('click', ev => {
@@ -1114,6 +1151,7 @@ app.addEventListener('click', ev => {
   if (!b) return;
   const accion = b.dataset.accion;
   if (accion === 'ir') ir(b.dataset.ruta);
+  else if (accion === 'salir') location.href = b.dataset.href + (location.protocol === 'file:' ? 'index.html' : '');
   else if (accion === 'ir-notas') { estado.aNotas = true; ir(''); }
   else if (accion === 'imprimir') { ajustarImpresion(); window.print(); }
   else if (accion === 'paso') {
@@ -1121,7 +1159,7 @@ app.addEventListener('click', ev => {
     const n = +b.dataset.paso;
     if (n < 0) { ir(rutaSemana()); return; }
     estado.paso = n;
-    if (n === 4) guardar(claveHecho(estado.dia), true);
+    if (n === 4) { guardar(claveHecho(estado.dia), true); guardar('ultimo', { s: NUM, d: estado.dia }); }
     pintar();
   } else if (accion === 'traduccion') {
     const i = estado.paso - 1, t = b.dataset.trad, p = SEM.pasajes[estado.dia - 1];
@@ -1133,6 +1171,7 @@ app.addEventListener('click', ev => {
     pintarMarcas(c);
     actualizarMarcador();
     b.parentNode.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    const tn = document.querySelector('.trans-nombre'); if (tn) tn.textContent = ({NVI: 'Nueva Versión Internacional', NTV: 'Nueva Traducción Viviente', DHH: 'Dios Habla Hoy'})[t] || t;
   } else if (accion === 'herramienta') {
     limpiarNotasVacias(true);
     estado.herramienta = b.dataset.h !== estado.herramienta ? b.dataset.h : null;
@@ -1160,6 +1199,7 @@ app.addEventListener('click', ev => {
   else if (accion === 'tamano') {
     guardar('escala', (leer('escala', 0) + 1) % ESCALAS.length);
     aplicarEscala();
+    ajustarAltos();
   } else if (accion === 'borrar') {
     if (b.dataset.confirmar) { borrarTodo(); aplicarEscala(); pintar(); }
     else { b.dataset.confirmar = '1'; b.textContent = T.borrarConfirmar; }
@@ -1183,13 +1223,18 @@ app.addEventListener('click', ev => {
 });
 app.addEventListener('input', ev => {
   const d = ev.target.dataset || {};
-  if (d.clave) guardar(d.clave, ev.target.value);
-  else if (d.pieId) {
+  if (d.clave) {
+    guardar(d.clave, ev.target.value);
+    if (ev.target.tagName === 'TEXTAREA') ajustarAlto(ev.target);
+  } else if (d.pieId) {
     const clave = document.getElementById('escritura').dataset.marcas;
     guardar(clave, marcasDe(clave).map(k => k.id === d.pieId ? { ...k, s: ev.target.value } : k));
     ajustarAlto(ev.target);
   }
 });
+app.addEventListener('toggle', ev => { if (ev.target.open) ajustarAltos(); }, true);
+let anchoAntes = innerWidth;
+window.addEventListener('resize', () => { if (innerWidth !== anchoAntes) { anchoAntes = innerWidth; ajustarAltos(); } });
 app.addEventListener('focusout', ev => {
   if (ev.target.dataset && ev.target.dataset.pieId) setTimeout(() => limpiarNotasVacias(false), 0);
 });

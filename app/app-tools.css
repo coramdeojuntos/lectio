@@ -1,49 +1,26 @@
 /* Experimentando a Dios juntos: el mismo diseño para todas las series e idiomas */
 /* Una sola columna, como un devocionario: la Escritura en tinta, las instrucciones en rojo (rúbricas). Colores tomados del Pentecostés de El Greco. */
+/* The study app's tools, on the shared reading look (reading.css loads first).
+   The app's own color names point to the shared colors; the series accent comes from reading.css. */
 :root {
-  --fondo: #f1f2ee;
-  --superficie: #fafaf7;
-  --tinta: #1d2330;
-  --tenue: #5a6170;
-  --linea: #d5d7d0;
-  --rubrica: #96202f;
-  --lapis: #234a7d;
-  --sobre-lapis: #ffffff;
-  --oro: #b98a1f;
+  --fondo: var(--bg); --superficie: var(--box); --tinta: var(--ink); --tenue: var(--muted); --linea: var(--line);
+  --rubrica: var(--accent-text); --lapis: var(--accent-text); --sobre-lapis: var(--bg); --oro: var(--accent-mark);
   --t-cruz: #1d2330; --t-una-vez: #1b7f66; --t-cada-dia: #5e55c0; --t-para-siempre: #b98a1f;
-  --m0: #ffd84d; --m0l: #c99700;
-  --m1: #a9e27a; --m1l: #4e9a2a;
-  --m2: #9dd0f7; --m2l: #2b7cc4;
-  --m3: #f8afc9; --m3l: #cf3f78;
-  --opacidad-resaltado: .7;
-  --escala: 1;
-  --serif: "Alegreya", Georgia, "Times New Roman", serif;
-  --sans: "Alegreya Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  color-scheme: light;
+  --m0: #ffd84d; --m0l: #c99700; --m1: #a9e27a; --m1l: #4e9a2a; --m2: #9dd0f7; --m2l: #2b7cc4; --m3: #f8afc9; --m3l: #cf3f78;
+  --opacidad-resaltado: .7; --escala: 1;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fondo: #11161e;
-    --superficie: #1a202b;
-    --tinta: #e8e6de;
-    --tenue: #a0a6b2;
-    --linea: #2e3643;
-    --rubrica: #ee9aa4;
-    --lapis: #9dbbe6;
-    --sobre-lapis: #10213a;
-    --oro: #d9b35a;
-    --t-cruz: #e8e6de; --t-una-vez: #5cc3a3; --t-cada-dia: #a29bf0; --t-para-siempre: #d9b35a;
-    --m0: #d9b02a; --m0l: #f0cc4e;
-    --m1: #6fb044; --m1l: #9fdb72;
-    --m2: #4b93cf; --m2l: #8cc6f2;
-    --m3: #c9638c; --m3l: #f09cbd;
-    --opacidad-resaltado: .4;
-    color-scheme: dark;
-  }
-}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --t-cruz: #e8e6de; --t-una-vez: #5cc3a3; --t-cada-dia: #a29bf0; --t-para-siempre: #d9b35a;
+  --m0: #d9b02a; --m0l: #f0cc4e; --m1: #6fb044; --m1l: #9fdb72; --m2: #4b93cf; --m2l: #8cc6f2; --m3: #c9638c; --m3l: #f09cbd;
+  --opacidad-resaltado: .4; } }
+:root[data-theme="dark"] {
+  --t-cruz: #e8e6de; --t-una-vez: #5cc3a3; --t-cada-dia: #a29bf0; --t-para-siempre: #d9b35a;
+  --m0: #d9b02a; --m0l: #f0cc4e; --m1: #6fb044; --m1l: #9fdb72; --m2: #4b93cf; --m2l: #8cc6f2; --m3: #c9638c; --m3l: #f09cbd;
+  --opacidad-resaltado: .4; }
 * { box-sizing: border-box; }
 html { font-size: calc(100% * var(--escala)); -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--fondo); color: var(--tinta); font-family: var(--sans); font-size: 1.0625rem; line-height: 1.5; }
+@media (min-width: 768px) { html { font-size: calc(117.65% * var(--escala)); } }
+body { font-family: var(--sans); font-size: 1.0625rem; line-height: 1.5; }
 #app { max-width: 40rem; margin: 0 auto; min-height: 100vh; overflow-x: clip; }
 [hidden] { display: none !important; }
 .atributo { color: var(--rubrica); font-size: .8125rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
@@ -268,17 +245,17 @@ textarea { width: 100%; min-height: 6rem; padding: .625rem .75rem; resize: verti
    Todo se mide en proporción al ancho de la hoja (--pulg, --pt) y no en pulgadas fijas: el teléfono imprime con el ancho
    de su pantalla y no con el del papel, y así cada hoja sigue cabiendo en una página. La hoja es un poco más chica que
    el espacio que dejan los márgenes, por si el teléfono o la impresora agregan los suyos. */
-.impresion { position: absolute; left: -10000px; top: 0; width: 7.3in; container-type: inline-size; color: #111; background: #fff; font-family: "Alegreya", Georgia, serif; line-height: 1.3; --pulg: calc(100cqw / 7.3); --pt: calc(var(--pulg) / 72); }
+.impresion { position: absolute; left: -10000px; top: 0; width: 7.3in; container-type: inline-size; color: #111; background: #fff; font-family: "Lora", Georgia, serif; line-height: 1.3; --pulg: calc(100cqw / 7.3); --pt: calc(var(--pulg) / 72); }
 .impresion h1, .impresion h2, .impresion h3, .impresion p { margin: 0; }
 .hoja { width: 100%; height: calc(var(--pulg) * 9.2); font-size: calc(var(--pt) * 12); padding: calc(var(--pulg) * .05) calc(var(--pulg) * .1) 0; display: flex; flex-direction: column; overflow: hidden; background: #fff; break-after: page; page-break-after: always; break-inside: avoid; }
 .hoja:last-child { break-after: auto; page-break-after: auto; }
-.cabeza-h { display: flex; justify-content: space-between; gap: 1em; font: 700 calc(var(--pt) * 7.5) "Alegreya Sans", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #555; padding-bottom: calc(var(--pt) * 5); border-bottom: calc(var(--pt) * .5) solid #999; margin-bottom: calc(var(--pt) * 16); }
-.pie-h { margin-top: auto; padding-top: calc(var(--pt) * 8); text-align: center; font: calc(var(--pt) * 8) "Alegreya Sans", sans-serif; color: #666; }
+.cabeza-h { display: flex; justify-content: space-between; gap: 1em; font: 700 calc(var(--pt) * 7.5) "Source Sans 3", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #555; padding-bottom: calc(var(--pt) * 5); border-bottom: calc(var(--pt) * .5) solid #999; margin-bottom: calc(var(--pt) * 16); }
+.pie-h { margin-top: auto; padding-top: calc(var(--pt) * 8); text-align: center; font: calc(var(--pt) * 8) "Source Sans 3", sans-serif; color: #666; }
 .caja { display: inline-block; width: calc(var(--pt) * 9); height: calc(var(--pt) * 9); border: calc(var(--pt) * .8) solid #333; margin-right: calc(var(--pt) * 5); vertical-align: calc(var(--pt) * -1); flex: none; }
 .renglones { flex: 1 1 0; min-height: calc(var(--pulg) * .31); overflow: hidden; }
 .renglones i { display: block; height: calc(var(--pulg) * .31); border-bottom: calc(var(--pt) * .6) solid #999; }
-.curso-h { font: 700 calc(var(--pt) * 8.5) "Alegreya Sans", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #444; }
-.semana-h { margin-top: calc(var(--pt) * 14); display: flex; flex-direction: column; gap: calc(var(--pt) * 5); font: calc(var(--pt) * 9.5) "Alegreya Sans", sans-serif; color: #444; }
+.curso-h { font: 700 calc(var(--pt) * 8.5) "Source Sans 3", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #444; }
+.semana-h { margin-top: calc(var(--pt) * 14); display: flex; flex-direction: column; gap: calc(var(--pt) * 5); font: calc(var(--pt) * 9.5) "Source Sans 3", sans-serif; color: #444; }
 .camino-h { display: grid; grid-template-columns: repeat(27, 1fr); gap: calc(var(--pt) * 2); }
 .camino-h span { height: calc(var(--pt) * 3); background: #ccc; }
 .camino-h span.actual { background: #111; }
@@ -286,36 +263,36 @@ textarea { width: 100%; min-height: 6rem; padding: .625rem .75rem; resize: verti
 .portada-h h1 { font-size: calc(var(--pt) * 34); font-weight: 500; line-height: 1.1; margin: calc(var(--pt) * 14) 0 calc(var(--pt) * 12); }
 .definicion-h { font-size: calc(var(--pt) * 12); line-height: 1.5; display: flex; flex-direction: column; gap: calc(var(--pt) * 7); }
 .dos-h { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--pulg) * .35); padding-top: calc(var(--pt) * 16); border-top: calc(var(--pt) * .5) solid #999; }
-.dos-h h2 { font: 700 calc(var(--pt) * 8) "Alegreya Sans", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #444; margin-bottom: calc(var(--pt) * 8); }
+.dos-h h2 { font: 700 calc(var(--pt) * 8) "Source Sans 3", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #444; margin-bottom: calc(var(--pt) * 8); }
 .dias-h { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: calc(var(--pt) * 7); font-size: calc(var(--pt) * 11.5); }
 .dias-h li { display: flex; align-items: baseline; }
-.dia-h { font: 700 calc(var(--pt) * 9) "Alegreya Sans", sans-serif; color: #444; width: 3.2em; }
+.dia-h { font: 700 calc(var(--pt) * 9) "Source Sans 3", sans-serif; color: #444; width: 3.2em; }
 .como-h { font-size: calc(var(--pt) * 10.5); line-height: 1.45; display: flex; flex-direction: column; gap: calc(var(--pt) * 5); }
 .ref-h { font-size: calc(var(--pt) * 25); font-weight: 500; line-height: 1.1; margin-bottom: calc(var(--pt) * 12); }
 .cuerpo-h { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) calc(var(--pulg) * 1.75); gap: calc(var(--pulg) * .3); }
 .version-h + .version-h { margin-top: calc(var(--pt) * 12); }
-.etiqueta-h { font: 700 calc(var(--pt) * 7.5) "Alegreya Sans", sans-serif; letter-spacing: .14em; color: #555; margin-bottom: calc(var(--pt) * 2); }
+.etiqueta-h { font: 700 calc(var(--pt) * 7.5) "Source Sans 3", sans-serif; letter-spacing: .14em; color: #555; margin-bottom: calc(var(--pt) * 2); }
 .texto-h p { font-size: calc(var(--pt) * 11.5); line-height: 1.62; padding-left: 2em; text-indent: -2em; }
 .texto-h p.sangria { padding-left: 3em; }
 .texto-h p.sangria2 { padding-left: 5em; }
 .texto-h p.prosa { padding-left: 0; text-indent: 0; }
-.vh { font: 700 .62em "Alegreya Sans", sans-serif; color: #555; vertical-align: .45em; line-height: 0; margin-right: .15em; }
+.vh { font: 700 .62em "Source Sans 3", sans-serif; color: #555; vertical-align: .45em; line-height: 0; margin-right: .15em; }
 .prosa .vh { margin-left: .1em; }
 .margen-h { border-left: calc(var(--pt) * .5) solid #bbb; padding-left: calc(var(--pt) * 8); }
-.margen-h span { font: 700 calc(var(--pt) * 7) "Alegreya Sans", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #888; }
+.margen-h span { font: 700 calc(var(--pt) * 7) "Source Sans 3", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #888; }
 .prep-h { font-style: italic; font-size: calc(var(--pt) * 10.5); color: #333; }
 .lectura-h { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; margin-top: calc(var(--pt) * 14); }
-.lectura-h h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 1em; font: 700 calc(var(--pt) * 11) "Alegreya Sans", sans-serif; }
+.lectura-h h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 1em; font: 700 calc(var(--pt) * 11) "Source Sans 3", sans-serif; }
 .silencio-h { font-weight: 400; font-size: calc(var(--pt) * 9); color: #333; display: inline-flex; align-items: center; }
 .guia-h { font-size: calc(var(--pt) * 10); line-height: 1.4; color: #333; margin: calc(var(--pt) * 3) 0 calc(var(--pt) * 4); }
-.hecho-h { margin-top: calc(var(--pt) * 10); align-self: flex-end; font: calc(var(--pt) * 9.5) "Alegreya Sans", sans-serif; display: flex; align-items: center; }
+.hecho-h { margin-top: calc(var(--pt) * 10); align-self: flex-end; font: calc(var(--pt) * 9.5) "Source Sans 3", sans-serif; display: flex; align-items: center; }
 .explicacion-h { font-size: calc(var(--pt) * 11); line-height: 1.45; margin-bottom: calc(var(--pt) * 4); }
 .pregunta-h { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; margin-top: calc(var(--pt) * 12); }
 .pregunta-h > p:first-child { font-size: calc(var(--pt) * 12); line-height: 1.3; display: flex; gap: .5em; }
 .pregunta-h .num { font-weight: 700; color: #555; width: 1em; flex: none; }
-.tema-h { font: 700 calc(var(--pt) * 7.5) "Alegreya Sans", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #666; margin: calc(var(--pt) * 3) 0 calc(var(--pt) * 2) 1.5em; }
+.tema-h { font: 700 calc(var(--pt) * 7.5) "Source Sans 3", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #666; margin: calc(var(--pt) * 3) 0 calc(var(--pt) * 2) 1.5em; }
 .pregunta-h .renglones { margin-left: 1.5em; }
-.creditos-h { margin-top: calc(var(--pt) * 12); font: calc(var(--pt) * 7) "Alegreya Sans", sans-serif; color: #666; line-height: 1.4; }
+.creditos-h { margin-top: calc(var(--pt) * 12); font: calc(var(--pt) * 7) "Source Sans 3", sans-serif; color: #666; line-height: 1.4; }
 @media print {
   @page { size: letter; margin: .5in; }
   html { font-size: 100%; }
@@ -329,3 +306,176 @@ textarea { width: 100%; min-height: 6rem; padding: .625rem .75rem; resize: verti
 /* Aclaraciones entre corchetes: añadidas por nosotros, no son texto de la traducción */
 .aclaracion { color: var(--tenue); }
 .hoja .aclaracion { color: #666; }
+
+
+/* ---- The reading look, for the app's own pieces (matches _Mockups/estudio-dia.html) ---- */
+h1 { font-weight: 700; letter-spacing: -.02em; }
+.encabezado h1, .cabeza-lectura h1 { font-size: clamp(2.1rem, 6vw, 2.9rem); line-height: 1.08; }
+.encabezado { gap: .5rem !important; }
+.atributo { font-weight: 500; font-size: .8125rem; letter-spacing: .18em; color: var(--accent-text); }
+.v { color: var(--accent-mark); }
+.fila .ref { margin: 0; text-transform: none; letter-spacing: 0; font-weight: 400; color: inherit; }
+/* Bible text and the week's opening at the reading look's size: 17px on phones, 20px on laptops */
+.escritura { font-size: 1.0625rem; line-height: 1.65; }
+.definicion { font-size: 1.0625rem; line-height: 1.65; }
+.pasaje .escritura { font-size: 1.0625rem; }
+
+/* week page: the "Semana 1 de 27" line as the spaced capital label; section titles as dotted labels */
+.encabezado .tenue.pequeno { font-weight: 500; font-size: .8125rem; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-text); margin-bottom: .375rem; }
+.camino span { border-radius: 2px; }
+.camino span.actual { background: var(--accent-mark); }
+.contenido > section > h2 { display: flex; align-items: center; gap: 12px; margin: .5rem 0 .25rem; font-family: var(--sans); font-weight: 500;
+  font-size: .8125rem; letter-spacing: .2em; text-transform: uppercase; color: var(--accent-text); }
+.contenido > section > h2::before { content: ""; flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-mark);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-mark) 16%, transparent); }
+.contenido > section > h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.fila .ref { color: var(--accent-text); }
+/* top bar: the shared rounded bar; the back button takes the series' place */
+.contenido > .topbar { margin: 0; }
+.topbar .atras { flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 0; border: 0; background: none;
+  color: var(--ink); font: 400 max(15px, 1.05em)/1 var(--sans); letter-spacing: 0; text-transform: none; cursor: pointer; text-align: left; }
+.topbar .atras span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topbar .atras { gap: 8px; }
+.topbar .atras .flecha { flex: none; font-weight: 400; font-size: 1.2em; color: var(--accent-text); }
+/* same position as the standard: bar 18px from the top, text 18px in from the bar's edge */
+.contenido { padding-top: 18px; }
+.contenido > .topbar .topbar-inner { padding-left: 18px; }
+.contenido > .topbar { margin-bottom: 2px; }
+/* reading step: step name, then translations with "Marcar el pasaje" on the same row, then the translation's name */
+.paso-nombre { margin-top: -.25rem; }
+.fila-lectura { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: -.5rem; }
+.fila-lectura .marcador { margin: 0 0 0 auto; }
+.fila-lectura .marcador.activo, .fila-lectura .marcador:has(.panel:not([hidden])) { flex-basis: 100%; margin-left: 0; }
+.abrir-marcador { color: var(--accent-text); font-weight: 600; padding: 0 1.25rem; min-height: 2.875rem; }
+.abrir-marcador svg { display: none; }
+.traducciones { margin: 0; }
+.traducciones button { font-weight: 600; font-size: .875rem; letter-spacing: .08em; color: var(--ink); min-width: 3.25rem; }
+@media (max-width: 600px) { .traducciones button { min-width: 2.75rem; letter-spacing: .04em; } .abrir-marcador { padding: 0 .9rem; } .fila-lectura { gap: 6px; } }
+.trans-nombre { margin-top: -.75rem; font-family: var(--sans); font-size: .9375rem; color: var(--muted); }
+.guia b { display: block; margin-bottom: .25rem; font-weight: 600; font-size: .8125rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-text); }
+
+/* progress: four steps (preparation + three readings) */
+.hilos { grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 0; }
+.hilos span { height: 4px; border-radius: 4px; }
+.hilos span.lleno { background: var(--accent-mark); }
+
+/* the preparation line is a quiet invitation; the note under it is small */
+.encabezado + .hilos + .guia { font-family: var(--serif); color: var(--ink); background: none; border: 0; padding: 0; font-size: 1.2rem !important; line-height: 1.45; }
+.encabezado + .hilos + .guia + .tenue { font-size: .9375rem; }
+/* reading guides: our words, in the tinted box with the accent bar */
+.guia { font-family: var(--sans); color: var(--ink); font-size: 1.0625rem; line-height: 1.55; border-top: 0; padding: 1rem 1.25rem;
+        background: var(--box); border-left: 4px solid var(--accent-mark); border-radius: 0 18px 18px 0; }
+.lectura-guia .duracion { color: var(--accent-text); font-weight: 600; letter-spacing: .06em; }
+
+/* rounded controls, as in the reading look */
+.boton, .abrir-marcador, .opciones .listo, .aviso .listo, .minutos button { border-radius: 999px; }
+.boton.principal { background: var(--button); color: var(--on-button); box-shadow: 0 12px 24px rgba(109, 67, 34, .2); }
+.boton.secundario, .abrir-marcador, .opciones .listo, .minutos button { background: var(--box); }
+.traducciones { border-radius: 999px; padding: 3px; gap: 2px; background: var(--box); }
+.traducciones button { border-radius: 999px; }
+.traducciones button + button { border-left: 0; }
+.traducciones button[aria-pressed="true"] { background: var(--accent-text); color: var(--bg); }
+.herramientas { border-radius: 16px; overflow: hidden; }
+.herramientas button { background: var(--bg); }
+.herramientas button[aria-pressed="true"] { background: var(--accent-text); color: var(--bg); }
+.silencio, .aviso, .aviso-breve { border-radius: 18px; }
+textarea { border-radius: 14px; }
+.marcador.activo { background: var(--bg); top: 4.25rem; }
+/* buttons at the end of the page, on a thin line (no floating band) */
+.navegacion { position: static; margin: .5rem 0 0; padding: 1.5rem 0 0; background: none; border-top: 1px solid var(--line); }
+
+/* Option 1: one centered column at the reading width; every edge lines up */
+#app { max-width: calc(36em + 40px); }
+.escritura { max-width: none; }
+
+/* Sizes matched to the approved standard (_Mockups/estudio-dia.html), measured element by element.
+   Sizes follow the body text (17px phones, 20px laptops) like reading.css, not the app's rem. */
+.atributo, .paso-nombre { font-size: max(14px, .7em); font-weight: 600; letter-spacing: .18em; }
+.encabezado h1, .cabeza-lectura h1 { font-size: clamp(calc(33.6px * var(--text-scale, 1)), 6vw, calc(51.2px * var(--text-scale, 1))); line-height: 1.08; }
+.encabezado + .hilos + .guia { font-size: 1.15em !important; line-height: 1.55; }
+.encabezado + .hilos + .guia + .tenue { font-size: max(15px, .8em); }
+.boton { font: 600 max(15px, .8em)/1.2 var(--sans); min-height: 46px; padding: 10px 20px; }
+.traducciones { padding: 4px; }
+.traducciones button { font-size: max(14px, .72em); font-weight: 600; letter-spacing: .08em; min-height: 38px; min-width: 0; padding: 0 14px; }
+.abrir-marcador { font-size: max(15px, .8em); min-height: 46px; padding: 10px 20px; }
+.trans-nombre { font-size: max(15px, .76em); }
+.guia { font-size: max(16px, .86em); line-height: 1.55; }
+.guia b { font-size: max(14px, .78em); }
+.traducciones button[aria-pressed="true"] { font-weight: 600; }
+.atributo, .paso-nombre, .encabezado + .hilos + .guia + .tenue, .trans-nombre { line-height: 1.65; }
+/* Vertical spacing matched to the standard, measured between each pair of elements (laptop) */
+.contenido { gap: 18px; }
+.encabezado { gap: 12px !important; margin: 0; }
+.hilos { margin-top: 5px; }
+.paso-nombre { margin-top: 0; }
+.fila-lectura { margin-top: -2px; }
+.trans-nombre { margin-top: -8px; }
+.escritura + .notas-pie, .notas-pie:empty { margin: 0; }
+.guia { margin-top: 8px; padding: 16px 20px; }
+.encabezado + .hilos + .guia { padding: 0; }
+.encabezado + .hilos + .guia { margin-top: 0; }
+/* week page: the week's destination, featured after the list of days; a quiet footer */
+.destino { margin-top: 14px; padding: 22px 24px 24px; background: var(--box); border-left: 4px solid var(--accent-mark); border-radius: 0 22px 22px 0;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.destino .destino-etiqueta { margin: 0; font: 600 max(14px, .7em)/1.4 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--accent-text); }
+.contenido > section.destino > h2.destino-titulo { display: block; margin: 0; font: 700 1.6em/1.15 var(--serif); letter-spacing: -.02em; text-transform: none; color: var(--ink); }
+.contenido > section.destino > h2.destino-titulo::before, .contenido > section.destino > h2.destino-titulo::after { content: none; }
+.destino .destino-texto { margin: 0 0 6px; font-family: var(--serif); font-size: 1em; line-height: 1.55; color: var(--muted); }
+.pie { border-top: 0; padding-top: 10px; gap: .5rem; max-width: none; }
+.pie .enlace { min-height: 0; padding: 4px 0; color: var(--accent-text); }
+/* the guide page's opening line is the same quiet invitation as on the day page: Lora, no box */
+.contenido > h1 + .guia { font-family: var(--serif); color: var(--ink); background: none; border: 0; border-radius: 0; padding: 0 !important; margin-top: 0; font-size: 1.15em; line-height: 1.55; }
+/* right under a dotted section label, the lists start without a second line */
+.contenido > section > h2 + .lista, .contenido > section > h2 + div > .pasaje:first-of-type { border-top: 0; }
+.contenido > .topbar { margin-bottom: 12px !important; }
+.navegacion { margin-top: 22px; padding-top: 24px; }
+/* silence and note side by side, like the standard's two buttons */
+.acciones { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px; }
+.acciones .silencio { background: none; border: 0; padding: 0; gap: 10px; }
+.acciones .silencio:has(.reloj) { flex-basis: 100%; background: var(--box); border: 1px solid var(--line); padding: 1rem; }
+.acciones .silencio .fila-reloj { gap: 10px; }
+.acciones .silencio .boton.secundario { flex: none !important; }
+.acciones details > summary { min-height: 46px; padding: 10px 20px; border: 1px solid var(--line); border-radius: 999px; background: var(--box);
+  font: 600 max(15px, .8em)/1.2 var(--sans); color: var(--accent-text); }
+.acciones details > summary::before { content: none; }
+.acciones details[open] { flex-basis: 100%; }
+
+/* series home: the top bar on its own above the cover (or the title), then the page */
+.contenido.barra-serie { padding-bottom: 0; }
+.contenido.barra-serie + .contenido { padding-top: 0; }
+.contenido.barra-serie + .portada { margin-top: 0; }
+
+/* The top bar exactly as in the approved mockup (decided 2026-11-24): the column layout makes the bar's text a bit
+   larger (.76em instead of .72em); the back link and the spacing keep the mockup's sizes */
+.topbar .atras { font-size: max(15px, .9947em); }
+:root[data-layout="column"] .contenido > .topbar .topbar-inner { gap: 4px 14px; }
+@media (max-width: 600px) { :root[data-layout="column"] .contenido > .topbar .topbar-inner { gap: 4px 8px; } }
+
+/* Footnote notes under the Bible text (the marked phrase and the reader's note) at the reading look's note size,
+   15px on phones and 17px on laptops, so they read as footnotes, smaller than the text (decided 2026-11-24) */
+.notas-pie .frase, .notas-pie .texto, .notas-pie textarea { font-size: max(15px, .903rem); }
+
+/* Four marking tools in one row: Resaltar, Línea, Nota, Borrar (decided 2026-11-24) */
+.herramientas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* Boxes for writing grow with the text (app.js), so they need no scroll bar or drag handle (decided 2026-11-24) */
+textarea { resize: none; overflow: hidden; }
+
+/* End of a day: the button goes on to the next day; a quiet link back to the week under it (decided 2026-11-24) */
+.navegacion .enlace { justify-self: center; color: var(--accent-text); }
+
+/* "Tus notas" on the series home page (decided 2026-11-24): the explanation, one button, restore as a short line,
+   the Home Screen help (phones only), and "Borrar todo" last, small and quiet. No extra line above the section. */
+.notas-serie { border-top: 0; padding-top: 0; gap: 14px; }
+.notas-serie .notas-explica { margin: 0; font-family: var(--serif); font-size: 1em; line-height: 1.6; color: var(--ink); }
+.notas-serie .notas-acciones { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.notas-serie .notas-acciones .boton { color: var(--accent-text); border: 1px solid var(--line); }
+.notas-serie .restaurar { margin: 0; font-size: max(15px, .8em); color: var(--muted); }
+.notas-serie .restaurar .enlace { color: var(--accent-text); }
+.notas-serie .borrar-todo { align-self: flex-start; margin-top: 6px; font-size: max(15px, .76em); color: var(--muted); }
+/* the line under "Guardar una copia": what the file is, read before saving (the browser's save window hides anything shown after) */
+.notas-serie .copia-explica { margin: -2px 0 4px; font-size: max(15px, .8em); line-height: 1.5; color: var(--muted); }
+
+/* "En pantalla o en papel" on the series home page (decided 2026-11-24) */
+.dos-formas { display: flex; flex-direction: column; gap: 12px; }
+.dos-formas p { margin: 0; font-family: var(--serif); font-size: 1em; line-height: 1.6; color: var(--ink); }

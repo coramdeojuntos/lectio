@@ -5,6 +5,7 @@ window.TEXTOS = {
 
   // navegación
   todasSemanas: 'Todas las semanas',
+  todasSeries: 'Todas las series',
   volverSemana: 'Volver a la semana',
   volver: 'Volver',
   tamano: 'Cambiar el tamaño del texto',
@@ -30,7 +31,12 @@ window.TEXTOS = {
 
   // tus notas
   tusNotas: 'Tus notas',
-  notasDispositivo: 'Tu progreso, tus notas y tus marcas se guardan solo en este dispositivo. Para tenerlas a salvo o pasarlas a otro dispositivo, guarda una copia.',
+  // «En pantalla o en papel» en la página de cada serie, y una línea al pie de cada semana (aprobados 2026-11-24)
+  dosFormas: 'En pantalla o en papel',
+  enPantalla: ['En pantalla.', 'Mientras lees, puedes resaltar palabras, subrayarlas y escribir notas junto al pasaje. Después de cada lectura, escribe lo que Dios te habló. Todo queda guardado en este dispositivo.'],
+  enPapel: ['En papel.', '¿Prefieres leer con lápiz en mano? Cada semana se puede imprimir o guardar como PDF: el pasaje en las tres traducciones, espacio para tus notas y líneas para escribir. Abre una semana y toca «Imprimir la semana».'],
+  semanaPapel: '¿Prefieres el papel? Toca «Imprimir la semana» arriba para imprimir esta semana o guardarla como PDF.',
+  notasDispositivo: 'Tus notas, tus marcas y los días que terminaste se guardan solo en este dispositivo, no en internet. Si cambias de teléfono o se borran los datos del navegador, se pierden. Guarda una copia de vez en cuando.',
   notasSemana: 'Tus notas se guardan solo en este dispositivo.',
   notasSemanaEnlace: 'Cómo guardar una copia',
   avisoTitulo: 'Agrega el estudio a tu pantalla de inicio',
@@ -50,11 +56,13 @@ window.TEXTOS = {
   compartir: 'Compartir',
   enInicio: 'Estás usando el estudio desde tu pantalla de inicio.',
   avisoEnlace: 'Cómo agregar el estudio a la pantalla de inicio',
-  guardarCopia: 'Guardar una copia de mis notas',
-  restaurarCopia: 'Restaurar desde una copia',
-  borrarTodo: 'Borrar mi progreso, mis notas y mis marcas',
+  guardarCopia: 'Guardar una copia',
+  restaurarPregunta: '¿Cambiaste de teléfono o de computadora, o se borraron tus notas?',
+  restaurarCopia: 'Restaurar una copia',
+  borrarTodo: 'Borrar todo y empezar de nuevo',
   borrarConfirmar: 'Toca otra vez para borrar todo',
-  copiaLista: 'Copia lista. Guárdala donde la puedas encontrar.',
+  copiaLista: 'Copia lista.',
+  copiaExplica: 'Se guarda como un archivo para el estudio, no para leerlo. Para recuperar tus notas, ábrelo con «Restaurar una copia».',
   copiaTitulo: 'Copia de mis notas',
   copiaNoValida: 'Ese archivo no es una copia de este estudio.',
   copiaVacia: 'La copia no tiene notas para restaurar.',
@@ -78,6 +86,7 @@ window.TEXTOS = {
   diaCompleto: d => `Día ${d} completo`,
   tusNotasHoy: 'Tus notas de hoy',
   sigueDia: (d, ref) => `Sigue el día ${d}: ${ref}.`,
+  irDia: d => `Ir al día ${d}`,
   terminaste: titulo => `Terminaste los cinco días. Ahora sigue «${titulo}»: seis preguntas para conversar con tu grupo sobre lo que Dios te habló esta semana.`,
   verPreguntas: 'Ver las preguntas',
 

@@ -9,10 +9,7 @@ window.SERIE = {
   },
   "titulo": "Los atributos de Dios",
   "nombreCompleto": "Experimentando los atributos de Dios juntos",
-  "portada": {
-    "src": "../../recursos/pentecostes.jpg",
-    "alt": "Pentecostés, de El Greco: la paloma del Espíritu Santo sobre los discípulos"
-  },
+  "portada": null,
   "introduccion": [
     "¿Quién es Dios? Durante veintisiete semanas vamos a contemplar su carácter, un atributo a la vez. No para juntar datos sobre Él, sino para conocerlo.",
     "Cada semana gira en torno a un atributo y cinco pasajes de la Biblia que lo muestran. Los leemos despacio, en silencio y en oración, al estilo de la Lectio Divina, y luego lo conversamos juntos."

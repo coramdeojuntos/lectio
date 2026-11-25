@@ -1,0 +1,281 @@
+/* ==========================================================================
+   The reading look: the shared stylesheet for every reading project
+   (studies, devotional series, daily readings). Approved on screen by the
+   user on 2026-11-24; see _Shared/Design.md and _Shared/reading-example.html.
+
+   Use it unchanged. A series changes only its accent (section 1b), in its own
+   small <style> block after this file. If a page needs something this file
+   doesn't cover, ask; don't improvise new styles.
+
+   Fonts (load in each page's <head>):
+   https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,700;1,400&family=Source+Sans+3:wght@400;500;700&display=swap
+   ========================================================================== */
+
+/* 1a. Shared colors: warm cream (light) and warm brown (dark) */
+:root {
+  --bg: #f4efe6; --bg-top: #f8f3eb; --bg-bottom: #efe5d7;
+  --box: #fff9f1;                         /* notes, top bar, buttons */
+  --ink: #2c241d;                         /* main text: Scripture, titles, notes */
+  --ink-strong: #1f1913;                  /* bold words */
+  --muted: #65594d;                       /* soft text: opening paragraph, references */
+  --line: rgba(96, 61, 32, .14);
+  --shadow: 0 18px 52px rgba(64, 39, 16, .10);
+  --serif: "Lora", Georgia, "Times New Roman", serif;
+  --sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #2b2219; --bg-top: #33291e; --bg-bottom: #251d15;
+    --box: #473a2c; --ink: #e3d8c6; --ink-strong: #fffaf2; --muted: #bfae95;
+    --line: rgba(242, 207, 158, .18); --shadow: 0 18px 52px rgba(0, 0, 0, .28);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #2b2219; --bg-top: #33291e; --bg-bottom: #251d15;
+  --box: #473a2c; --ink: #e3d8c6; --ink-strong: #fffaf2; --muted: #bfae95;
+  --line: rgba(242, 207, 158, .18); --shadow: 0 18px 52px rgba(0, 0, 0, .28);
+  color-scheme: dark;
+}
+
+/* 1b. The series accent. Default: bronze (Easter week).
+   --accent-text: labels, links, button text.  --accent-mark: verse numbers, dots, the note bar.
+   A series overrides these four values (light and dark) and nothing else, e.g.
+   :root { --accent-text-light: #6e1f2c; --accent-mark-light: #9a3242; --accent-text-dark: #f2bcc4; --accent-mark-dark: #e5939f; }
+   The main button takes its color from the light shades in both modes. */
+:root {
+  --accent-text-light: #603d20; --accent-mark-light: #8b5e34;
+  --accent-text-dark: #f2cf9e; --accent-mark-dark: #e6b67a;
+  --accent-text: var(--accent-text-light); --accent-mark: var(--accent-mark-light);
+  --button: linear-gradient(135deg, var(--accent-mark-light), var(--accent-text-light)); --on-button: #fffaf4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --accent-text: var(--accent-text-dark); --accent-mark: var(--accent-mark-dark); }
+}
+:root[data-theme="dark"] { --accent-text: var(--accent-text-dark); --accent-mark: var(--accent-mark-dark); }
+
+/* 2. Page and text size: 17px on phones, 20px from 768px wide; everything else in em.
+   --text-scale is the reader's Aa choice (1, 1.15 or 1.3; set by reading.js). */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0; color: var(--ink); font-family: var(--serif); font-size: calc(17px * var(--text-scale, 1)); line-height: 1.65;
+  background: radial-gradient(circle at top left, rgba(212, 170, 110, .20), transparent 34rem),
+              linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 40%, var(--bg-bottom) 100%) fixed;
+  background-color: var(--bg);
+}
+@media (min-width: 768px) { body { font-size: calc(20px * var(--text-scale, 1)); } }
+a { color: var(--accent-text); }
+:focus-visible { outline: 2px solid var(--accent-mark); outline-offset: 3px; border-radius: 6px; }
+i, em { font-style: italic; }          /* italics only for short stretches */
+/* Bold stands out in both modes: darker on cream, brighter on brown (dark text is a touch softer so bold can shine) */
+b, strong { color: var(--ink-strong); }
+nav.pager a b { color: inherit; }
+
+/* 3. Reading progress line (optional; reading.js fills it) */
+.progress { position: fixed; inset: 0 0 auto 0; height: 4px; z-index: 30; background: rgba(139, 94, 52, .10); }
+.progress span { display: block; height: 100%; width: 0; background: var(--accent-mark); }
+
+/* 4. Page column */
+.shell {
+  width: min(calc(100% - 32px), 46em); margin: 0 auto; padding: 18px 0 64px;
+  padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* 4b. Two layouts, chosen per project when it starts (see Design.md section 0):
+   - "wide" (the default, the Easter week): the top bar and title use the wider frame, and on laptops
+     "In this reading" sits beside the opening paragraph; the reading column starts at the same left edge.
+   - "column" (the study app): one centered column at the reading width, so every edge lines up.
+     Set it with <html data-layout="column">. */
+:root[data-layout="column"] .shell { width: min(calc(100% - 32px), 36em); }
+@media (min-width: 860px) { :root[data-layout="column"] .hero-grid { grid-template-columns: 1fr; gap: 24px; } }
+:root[data-layout="column"] .topbar-inner { text-transform: none; letter-spacing: 0; font-size: max(15px, .76em); gap: 4px 12px; }
+:root[data-layout="column"] .topbar .part { display: none; }   /* the narrower bar has no room for it */
+
+/* 5. Top bar: series name (link home), part of the series, language link, Aa, print, Light/Dark.
+   Order inside .topbar-inner: <a>series</a> <span class="part"> <a class="lang"> [data-text-size] [data-print] [data-theme-toggle] */
+.topbar { position: sticky; top: 12px; z-index: 20; margin-bottom: 22px; }
+.topbar-inner {
+  display: flex; align-items: center; gap: 4px 14px; padding: 4px 6px 4px 22px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: color-mix(in srgb, var(--box) 82%, transparent);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 12px 32px rgba(64, 39, 16, .08);
+  font-family: var(--sans); font-size: max(14px, .72em); letter-spacing: .16em; text-transform: uppercase;
+}
+.topbar a:not(.lang) { flex: 1; min-width: 0; min-height: 44px; display: block; line-height: 44px; color: var(--ink);
+            text-decoration: none; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar a:not(.lang):hover { color: var(--accent-text); }
+/* The partner page in the other language (Publishing.md: on every page) */
+.topbar a.lang { flex: none; min-height: 44px; display: inline-flex; align-items: center; padding: 0 4px;
+                 color: var(--accent-text); text-decoration: none; font-weight: 500; white-space: nowrap; }
+.topbar a.lang:hover { text-decoration: underline; text-underline-offset: 3px; }
+.topbar .part { color: var(--muted); white-space: nowrap; }
+.theme-toggle, .text-size, .print-button {
+  flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px;
+  background: transparent; color: var(--ink); cursor: pointer;
+  font: 500 max(14px, .8em)/1 var(--sans); letter-spacing: 0; text-transform: none; white-space: nowrap;
+}
+.theme-toggle:hover, .text-size:hover, .print-button:hover { border-color: var(--accent-mark); }
+.print-button svg { width: 1.15em; height: 1.15em; flex: none; }
+.text-size { padding: 0 12px; font-size: max(15px, .86em); }
+
+/* 6. Day header: label, title, opening paragraph (soft), contents */
+.hero { padding: 24px 0 0; margin-bottom: 2.6em; }   /* space before the first scene, even when no section label opens the reading */
+.eyebrow {
+  display: flex; align-items: center; gap: 12px; margin: 0 0 16px;
+  font-family: var(--sans); font-weight: 500; font-size: max(14px, .72em); letter-spacing: .2em;
+  text-transform: uppercase; color: var(--accent-text);
+}
+.eyebrow::before { content: ""; flex: none; width: 34px; height: 1px; background: currentColor; opacity: .7; }
+h1 { margin: 0; font-weight: 700; font-size: clamp(2.45em, 7vw, 3.68em); line-height: 1.02; letter-spacing: -.03em; text-wrap: balance; }
+.hero-grid { display: grid; gap: 24px; margin-top: 20px; }
+@media (min-width: 860px) { .hero-grid { grid-template-columns: minmax(0, 1fr) 15em; gap: 36px; align-items: start; } }
+.setting { margin: 0; font-size: 1.08em; line-height: 1.6; color: var(--muted); }
+
+nav.contents { padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-family: var(--sans); }
+nav.contents h2 { margin: 0 0 8px; font-size: max(14px, .72em); font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-text); }
+nav.contents ol { list-style: none; margin: 0; padding: 0; }
+nav.contents li.lab { margin: 12px 0 2px; font-size: max(14px, .66em); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+nav.contents li.lab:first-child { margin-top: 4px; }
+nav.contents a { display: block; padding: 5px 0; font-size: max(16px, .86em); line-height: 1.35; color: var(--accent-text); text-decoration: none; }
+nav.contents a::before { content: "→ "; opacity: .55; }
+nav.contents a:hover { text-decoration: underline; }
+
+/* 7. Reading: section labels, scenes, Scripture */
+main { max-width: 36em; }
+.label {
+  display: flex; align-items: center; gap: 12px; margin: 3.2em 0 1.4em;
+  font-family: var(--sans); font-weight: 500; font-size: max(14px, .72em); letter-spacing: .2em;
+  text-transform: uppercase; color: var(--accent-text);
+}
+.label::before { content: ""; flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-mark);
+                 box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-mark) 16%, transparent); }
+.label::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+/* when a long label wraps (phones, Spanish), the dot stays with the first line */
+.label, h2.group { align-items: flex-start; }
+.label::before, h2.group::before { margin-top: .5em; }
+.label::after, h2.group::after { align-self: center; }
+section.scene { margin: 0 0 2.6em; scroll-margin-top: 90px; }
+section.scene h2 { margin: 0; font-weight: 700; font-size: 1.5em; line-height: 1.15; letter-spacing: -.02em; text-wrap: balance; }
+.ref { margin: 6px 0 18px; font-family: var(--sans); font-weight: 500; font-size: max(15px, .78em); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.text p { margin: 0 0 .9em; }
+.text p:last-child { margin-bottom: 0; }
+sup.v { font-family: var(--sans); font-size: .6em; font-weight: 700; color: var(--accent-mark); vertical-align: .55em; line-height: 0; margin-right: .2em; }
+.sc { font-size: .84em; letter-spacing: .04em; }                 /* LORD in small capitals */
+.bracket, .aclaracion { color: var(--muted); }                    /* [our clarifications] */
+/* Poetry: each line a span (.l0 .l1 .l2); a wrapped line indents deeper than any level */
+.poem { margin: 0 0 .9em; }
+.poem > span { display: block; padding-left: 3.6em; text-indent: -3.6em; }
+.poem > .l1 { text-indent: -2.4em; }
+.poem > .l2 { text-indent: -1.2em; }
+
+/* 8. After a scene: "Also in" and notes (our words, kept apart from Scripture) */
+.also { margin: 18px 0 0; font-family: var(--sans); font-size: max(15px, .8em); color: var(--muted); }
+.also b, .note b { display: inline-block; margin-right: 8px; font-weight: 500; font-size: max(14px, .7em); letter-spacing: .16em; text-transform: uppercase; color: var(--accent-text); }
+.note { margin: 16px 0 0; padding: 16px 20px; border-left: 4px solid var(--accent-mark); border-radius: 0 18px 18px 0;
+        background: var(--box); font-family: var(--sans); font-size: max(15px, .84em); line-height: 1.55; }
+.note b { display: block; margin-bottom: 2px; }
+
+/* 9. Buttons and previous / next */
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 22px; border-radius: 999px;
+       border: 1px solid var(--line); background: var(--box); color: var(--accent-text); text-decoration: none; cursor: pointer;
+       font: 500 max(15px, .8em)/1.2 var(--sans); }
+.btn.main { border-color: transparent; background: var(--button); color: var(--on-button); box-shadow: 0 12px 24px rgba(109, 67, 34, .2); }
+nav.pager { max-width: 36em; margin-top: 40px; padding-top: 28px; border-top: 1px solid var(--line);
+            display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-family: var(--sans); }
+nav.pager a { flex: 1 1 14em; display: flex; flex-direction: column; gap: 2px; padding: 14px 22px; border-radius: 22px; text-decoration: none;
+              border: 1px solid var(--line); background: var(--box); color: var(--ink); box-shadow: 0 10px 26px rgba(64, 39, 16, .06); }
+nav.pager a.next { text-align: right; background: var(--button); color: var(--on-button); border-color: transparent; }
+nav.pager a span { font-size: max(14px, .68em); font-weight: 500; letter-spacing: .16em; text-transform: uppercase; opacity: .85; }
+nav.pager a b { font-weight: 500; font-size: 1em; }
+footer { max-width: 36em; margin-top: 26px; font-family: var(--sans); font-size: max(15px, .78em); color: var(--muted); }
+
+/* 10. Series home page: title, subtitle, introduction, list of days */
+.series-hero { padding: 24px 0 8px; }
+.subtitle { margin: 14px 0 0; font-size: 1.2em; line-height: 1.45; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 0; }   /* e.g. the "Download the PDF" button under the subtitle */
+.intro { max-width: 36em; }
+.intro h2 { margin: 2em 0 .5em; font-weight: 700; font-size: 1.3em; line-height: 1.2; }
+.intro p { margin: 0 0 1em; }
+.intro ul { margin: 0; padding-left: 1.2em; font-family: var(--sans); font-size: max(16px, .86em); line-height: 1.55; }
+.intro li + li { margin-top: 8px; }
+h2.group { max-width: 36em; display: flex; align-items: center; gap: 12px; margin: 3em 0 .6em;
+           font-family: var(--sans); font-weight: 500; font-size: max(14px, .72em); letter-spacing: .2em; text-transform: uppercase; color: var(--accent-text); }
+h2.group::before { content: ""; flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--accent-mark);
+                   box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent-mark) 16%, transparent); }
+h2.group::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+ol.days { max-width: 36em; list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+ol.days li { border-bottom: 1px solid var(--line); }
+/* right under a dotted label, the label's own line already opens the list: no second line */
+h2.group + ol.days { border-top: 0; }
+ol.days a { display: block; padding: 14px 2px; text-decoration: none; color: var(--ink); }
+ol.days a span { display: block; font-family: var(--sans); font-weight: 500; font-size: max(14px, .68em); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+ol.days a b { display: block; margin-top: 2px; font-weight: 500; font-size: 1.15em; line-height: 1.3; color: var(--accent-text); }
+ol.days a:hover b { text-decoration: underline; }
+/* A longer list item, as on the library's home page: a short description under the title,
+   and an optional extra link below the item */
+ol.days a span.desc { display: block; margin-top: 4px; font-family: var(--serif); font-weight: 400; font-size: .92em; line-height: 1.55;
+                      letter-spacing: 0; text-transform: none; color: var(--muted); }
+ol.days .more { display: inline-block; margin: -4px 0 14px; padding: 4px 0; font-family: var(--sans); font-size: max(15px, .8em); color: var(--accent-text); }
+
+/* 11. Phones */
+@media (max-width: 600px) {
+  .shell { width: calc(100% - 24px); padding-top: 10px; }
+  .topbar { position: static; }
+  .topbar-inner { padding: 2px 4px 2px 16px; letter-spacing: .1em; }
+  .topbar .part { display: none; }
+  .topbar-inner { gap: 4px 8px; }
+  .theme-toggle .word, .print-button .word { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .theme-toggle, .print-button { padding: 0 11px; }
+  .eyebrow::before { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* 12. Print: black on white, US Letter, page numbers; fixed print sizes (in pt), taken from the
+   Easter week's earlier print pages so printouts stay as compact as before. The "In this reading" list,
+   the top bar and previous/next don't print. Put class "keep" on a short scene so it isn't split
+   across pages, and "screen-only" on anything else that shouldn't print (e.g. the PDF button).
+   One combined printout (continuous page numbers): put "new-page" on each reading's wrapper so it
+   starts a new page, and "cover" on a title page that shouldn't show a page number. */
+@media print {
+  @page { size: letter portrait; margin: .75in 1.1in .8in;
+          @bottom-center { content: counter(page); font-family: "Source Sans 3", sans-serif; font-size: 9pt; color: #444; } }
+  @page cover { @bottom-center { content: none; } }
+  .new-page { break-before: page; }
+  .cover { page: cover; break-after: page; }
+  :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
+    --ink: #000; --ink-strong: #000; --muted: #333; --line: #999; --accent-text: #000; --accent-mark: #555; --box: #fff; color-scheme: light; }
+  body { background: #fff; color: #000; font-size: 12pt; line-height: 1.48; }
+  .progress, .topbar, nav.contents, nav.pager, footer, .screen-only { display: none !important; }
+  .shell { width: auto; padding: 0; }
+  main, .intro, ol.days, h2.group { max-width: none; }
+  .hero { padding: 0; margin-bottom: 14pt; }
+  .eyebrow { font-size: 9pt; margin-bottom: 6pt; }
+  .eyebrow::before { display: none; }
+  h1 { font-size: 22pt; margin-bottom: 8pt; letter-spacing: -.01em; }
+  .hero-grid { display: block; margin-top: 0; }
+  .setting { font-size: 12pt; }
+  .label { font-size: 9pt; margin: 20pt 0 2pt; }
+  .label::before, h2.group::before { box-shadow: none; width: 6pt; height: 6pt; margin-top: .35em; }
+  section.scene { margin: 14pt 0 0; }
+  section.scene h2 { font-size: 14.5pt; }
+  .ref { font-size: 9.5pt; margin-bottom: 5pt; }
+  .text p, .poem { margin-bottom: 6pt; orphans: 3; widows: 3; }
+  .also { font-size: 9.5pt; margin-top: 6pt; }
+  .note { font-size: 9.5pt; margin-top: 6pt; padding: 5pt 8pt; border: .75pt solid #888; border-left: 2.5pt solid #555; border-radius: 0; background: none; }
+  .also b, .note b { font-size: 8pt; }
+  .note, .also, .poem { break-inside: avoid; }
+  .note, .also { break-before: avoid; }
+  section.scene.keep { break-inside: avoid; }
+  section.scene h2, .ref, .label, .hero, h2.group { break-after: avoid; }
+  .series-hero h1 { font-size: 30pt; }
+  .subtitle { font-size: 15pt; }
+  .intro h2 { font-size: 14.5pt; }
+  .intro p, .intro ul { font-size: 11.5pt; orphans: 3; widows: 3; }
+  h2.group { font-size: 9pt; margin: 22pt 0 4pt; }
+  ol.days a { padding: 3pt 0; }
+  ol.days a span { font-size: 8.5pt; }
+  ol.days a b { font-size: 11.5pt; font-weight: 400; }
+  a { color: #000; text-decoration: none; }
+}

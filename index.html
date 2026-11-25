@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-series="lectio" data-layout="column">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,15 +14,24 @@
   location.replace('es/atributos/' + (location.protocol === 'file:' ? 'index.html' : '') + ruta);
 })();
 </script>
+<link rel="icon" href="recursos/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="recursos/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="recursos/icono-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+Sans:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="app/estilo.css?v=7">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,700;1,400&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="app/reading.css?v=1">
+<link rel="stylesheet" href="app/app-tools.css?v=10">
+<script src="app/reading.js?v=1"></script>
 </head>
 <body>
 <main id="app">
   <div class="contenido">
+    <div class="topbar"><div class="topbar-inner">
+      <a href="../">← Biblioteca</a>
+      <button class="text-size" type="button" data-text-size>Aa</button>
+      <button class="theme-toggle" type="button" data-theme-toggle></button>
+    </div></div>
     <header class="encabezado">
       <h1>Experimentando a Dios juntos</h1>
       <p class="curso">Aprender teología meditando y orando la Palabra, en silencio y en comunidad</p>
@@ -62,6 +71,10 @@ document.querySelectorAll('#series .fila').forEach(function (a) {
   } catch (e) {}
   if (hechas) a.querySelector('.estado').textContent = hechas + ' de ' + total;
 });
+/* Aa (reading.js) cambia --text-scale; esta página mide su texto con --escala, como la app */
+function escala() { var r = document.documentElement; r.style.setProperty('--escala', r.style.getPropertyValue('--text-scale') || 1); }
+escala();
+document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('[data-text-size]')) setTimeout(escala); });
 if (location.protocol === 'file:') document.querySelectorAll('#series .fila').forEach(function (a) { a.href += 'index.html'; });
 </script>
 </body>
