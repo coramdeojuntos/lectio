@@ -227,11 +227,15 @@ function pasosInicio() {
 }
 function avisoInicio() {
   if (enPantallaInicio() || !(esIOS || esAndroid) || leer('aviso-inicio', false)) return '';
+  // una tarjeta corta (2026-11-25): los pasos aparecen solo al tocar «Cómo hacerlo»
   return `<section class="aviso">
       <h3>${esc(T.avisoTitulo)}</h3>
       <p>${esc(T.avisoPorQue)}</p>
-      ${pasosInicio()}
-      <button class="listo" data-accion="aviso">${esc(T.ahoraNo)}</button>
+      <div class="aviso-pasos" hidden>${pasosInicio()}</div>
+      <div class="aviso-botones">
+        <button class="listo" data-accion="aviso-pasos">${esc(T.comoHacerlo)}</button>
+        <button class="listo" data-accion="aviso">${esc(T.ahoraNo)}</button>
+      </div>
     </section>`;
 }
 
@@ -255,6 +259,17 @@ function seccionNotas() {
       ${ayuda}
       <button class="enlace borrar-todo" data-accion="borrar" id="borrar">${esc(T.borrarTodo)}</button>
     </section>`;
+}
+
+// «Cómo funciona» (2026-11-25): primero «Elige cómo leer» (en pantalla o en papel, igual para todas las series),
+// luego los pasos de la serie. Abierto para quien todavía no termina ningún día; después, una línea plegada.
+function comoFunciona() {
+  const pasos = `<ol class="pasos"><li><b>${esc(T.elegirComo[0])}</b> ${esc(T.elegirComo[1])}</li>${SERIE.comoFunciona.map(t => `<li>${enfasis(t)}</li>`).join('')}</ol>
+        <button class="enlace" data-accion="ir" data-ruta="guia">${esc(T.comoMeditar)}</button>`;
+  const empezado = SERIE.semanas.some(s => s.disponible && estadoSemana(s.numero));
+  return empezado
+    ? `<details class="como-funciona plegado"><summary>${esc(T.comoFunciona)}</summary>${pasos}</details>`
+    : `<section class="como-funciona"><h2>${esc(T.comoFunciona)}</h2>${pasos}</section>`;
 }
 
 function vistaSerie() {
@@ -284,15 +299,7 @@ function vistaSerie() {
       <div class="definicion">${SERIE.introduccion.map(t => `<p>${enfasis(t)}</p>`).join('')}</div>
       ${sig ? `<button class="boton principal continuar" data-accion="ir" data-ruta="${sig.ruta}">${esc(sig.texto)}<span>${esc(sig.detalle)}</span></button>` : ''}
       ${avisoInicio()}
-      <section class="como-funciona">
-        <h2>${esc(T.comoFunciona)}</h2>
-        <ol class="pasos">${SERIE.comoFunciona.map(t => `<li>${enfasis(t)}</li>`).join('')}</ol>
-        <button class="enlace" data-accion="ir" data-ruta="guia">${esc(T.comoMeditar)}</button>
-      </section>
-      <section class="dos-formas">
-        <h2>${esc(T.dosFormas)}</h2>
-        ${[T.enPantalla, T.enPapel].map(([tit, txt]) => `<p><b>${esc(tit)}</b> ${esc(txt)}</p>`).join('')}
-      </section>
+      ${comoFunciona()}
       <section>
         <h2>${esc(T.lasSemanas(TOTAL))}</h2>
         ${semanas}
@@ -1210,6 +1217,10 @@ app.addEventListener('click', ev => {
     c.innerHTML = escritura(SEM.pasajes[i][t]);
     pintarMarcas(c);
     b.parentNode.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  } else if (accion === 'aviso-pasos') {
+    const c = b.closest('.aviso');
+    c.querySelector('.aviso-pasos').hidden = false;
+    b.remove();
   } else if (accion === 'aviso') {
     guardar('aviso-inicio', true);
     b.closest('.aviso').remove();

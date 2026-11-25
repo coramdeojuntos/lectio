@@ -476,6 +476,14 @@ textarea { resize: none; overflow: hidden; }
 /* the line under "Guardar una copia": what the file is, read before saving (the browser's save window hides anything shown after) */
 .notas-serie .copia-explica { margin: -2px 0 4px; font-size: max(15px, .8em); line-height: 1.5; color: var(--muted); }
 
-/* "En pantalla o en papel" on the series home page (decided 2026-11-24) */
-.dos-formas { display: flex; flex-direction: column; gap: 12px; }
-.dos-formas p { margin: 0; font-family: var(--serif); font-size: 1em; line-height: 1.6; color: var(--ink); }
+/* The Home Screen card (decided 2026-11-25): title, one line, two buttons; the steps open with «Cómo hacerlo» */
+.aviso { gap: 10px; padding: 18px 20px; background: var(--box); border: 1px solid var(--line); border-left: 4px solid var(--accent-mark); border-radius: 0 18px 18px 0; }
+.aviso h3 { font-family: var(--serif); font-weight: 700; font-size: 1.05em; line-height: 1.35; color: var(--ink); }
+.aviso > p { margin: 0; font-size: max(15px, .85em); color: var(--muted); }
+.aviso-botones { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.aviso-botones .listo { min-height: 44px; padding: 0 18px; background: var(--bg); color: var(--accent-text); font-weight: 600; }
+.aviso-pasos .pasos-inicio, .aviso-pasos p { font-size: max(15px, .85em); }
+/* "Cómo funciona" folded into one line once the reader has finished a day (decided 2026-11-25) */
+.como-funciona.plegado > summary { font-weight: 600; color: var(--accent-text); }
+.como-funciona.plegado > :not(summary) { margin-left: 1.5rem; }
+.como-funciona.plegado .pasos { margin-block: .25rem .75rem; }

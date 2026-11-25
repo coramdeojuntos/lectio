@@ -31,15 +31,14 @@ window.TEXTOS = {
 
   // tus notas
   tusNotas: 'Tus notas',
-  // «En pantalla o en papel» en la página de cada serie, y una línea al pie de cada semana (aprobados 2026-11-24)
-  dosFormas: 'En pantalla o en papel',
-  enPantalla: ['En pantalla.', 'Mientras lees, puedes resaltar palabras, subrayarlas y escribir notas junto al pasaje. Después de cada lectura, escribe lo que Dios te habló. Todo queda guardado en este dispositivo.'],
-  enPapel: ['En papel.', '¿Prefieres leer con lápiz en mano? Cada semana se puede imprimir o guardar como PDF: el pasaje en las tres traducciones, espacio para tus notas y líneas para escribir. Abre una semana y toca «Imprimir la semana».'],
+  // El primer paso de «Cómo funciona» en todas las series, y una línea al pie de cada semana (aprobados 2026-11-24/25)
+  elegirComo: ['Elige cómo leer:', 'en pantalla, donde puedes resaltar, subrayar y escribir notas junto al pasaje; o en papel, imprimiendo cada semana o guardándola como PDF.'],
   semanaPapel: '¿Prefieres el papel? Toca «Imprimir la semana» arriba para imprimir esta semana o guardarla como PDF.',
   notasDispositivo: 'Tus notas, tus marcas y los días que terminaste se guardan solo en este dispositivo, no en internet. Si cambias de teléfono o se borran los datos del navegador, se pierden. Guarda una copia de vez en cuando.',
   notasSemana: 'Tus notas se guardan solo en este dispositivo.',
   notasSemanaEnlace: 'Cómo guardar una copia',
-  avisoTitulo: 'Agrega el estudio a tu pantalla de inicio',
+  avisoTitulo: 'Te recomendamos agregar el estudio a tu pantalla de inicio.',
+  comoHacerlo: 'Cómo hacerlo',
   avisoPorQue: 'Así se abre como una app, y tus notas no se pierden.',
   pasosIOS: [
     'Toca el botón Compartir {compartir}: el cuadrado con una flecha hacia arriba. En Safari está abajo; en Chrome, arriba a la derecha.',
