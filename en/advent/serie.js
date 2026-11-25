@@ -51,7 +51,7 @@ window.SERIE = {
       "numero": 3,
       "titulo": "Good News of Great Joy",
       "termino": "joy",
-      "disponible": false
+      "disponible": true
     },
     {
       "numero": 4,
