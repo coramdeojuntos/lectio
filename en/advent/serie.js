@@ -57,7 +57,7 @@ window.SERIE = {
       "numero": 4,
       "titulo": "God with Us",
       "termino": "love",
-      "disponible": false
+      "disponible": true
     }
   ],
   "preparacion": "Quiet your heart, and ask the Holy Spirit to guard and guide your meditation.",
