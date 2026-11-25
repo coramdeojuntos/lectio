@@ -49,7 +49,7 @@ function datosGuardados() {
 async function exportarCopia() {
   const hoy = new Date().toISOString().slice(0, 10);
   const contenido = JSON.stringify({ app: SERIE.clave, version: 1, fecha: hoy, datos: datosGuardados() });
-  const archivo = new File([contenido], `${SERIE.clave}-notas-${hoy}.json`, { type: 'application/json' });
+  const archivo = new File([contenido], `${SERIE.clave}-${T.archivoNotas}-${hoy}.json`, { type: 'application/json' });
   // En el teléfono, el menú de compartir permite guardarla en Archivos, enviarla o pasarla por AirDrop
   if (matchMedia('(pointer: coarse)').matches && navigator.canShare && navigator.canShare({ files: [archivo] })) {
     try { await navigator.share({ files: [archivo], title: T.copiaTitulo }); return true; }
@@ -185,12 +185,28 @@ function barra(titulo, ruta, etiqueta) {
   const destino = ruta.startsWith('../') ? `data-accion="salir" data-href="${ruta}"` : `data-accion="ir" data-ruta="${ruta}"`;
   return `<div class="topbar"><div class="topbar-inner">
     <button class="atras" ${destino} aria-label="${esc(etiqueta)}"><b class="flecha" aria-hidden="true">‹</b><span>${esc(titulo)}</span></button>
+    ${enlaceIdioma()}
     <button class="text-size" type="button" data-text-size>Aa</button>
     ${NUM && estado.vista === 'semana' ? `<button class="print-button" data-accion="ir" data-ruta="${rutaSemana('/imprimir')}" aria-label="${esc(T.imprimirSemana)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg><span class="word">${esc(T.imprimirSemana)}</span></button>` : ''}
     <button class="theme-toggle" type="button" data-theme-toggle></button>
   </div></div>`;
 }
 const rutaSemana = (sufijo = '') => `semana-${NUM}${sufijo}`;
+
+/* Direcciones en el idioma de la serie (2026-11-25): por dentro las rutas siempre usan las palabras en español
+   (semana-1/dia-2, grupo, imprimir, guia); en la dirección se ven con las palabras de T.rutas (en inglés, week-1/day-2…).
+   Una dirección con las palabras en español sirve en cualquier idioma: así el enlace al otro idioma lleva al mismo lugar. */
+const RUTAS = T.rutas || {};
+const aUrl = r => r.replace(/[a-z]+/g, w => RUTAS[w] || w);
+const deUrl = h => { const inv = {}; for (const k in RUTAS) inv[RUTAS[k]] = k; return h.replace(/[a-z]+/g, w => inv[w] || w); };
+const rutaActual = () => deUrl(location.hash.slice(1));
+/* El mismo lugar en el otro idioma (Design.md: «English» / «Español» en la barra), solo si la serie tiene pareja */
+function enlaceIdioma() {
+  const o = SERIE.otroIdioma;
+  if (!o) return '';
+  const r = rutaActual();
+  return `<a class="lang" href="${esc(o.ruta)}${location.protocol === 'file:' ? 'index.html' : ''}${r ? '#' + esc(r) : ''}" lang="${esc(o.idioma)}" hreflang="${esc(o.idioma)}">${esc(o.etiqueta)}</a>`;
+}
 
 // a dónde lleva «Continuar»: el primer día sin terminar de las semanas disponibles
 // «Continuar» retoma donde el lector se quedó (2026-11-24): el primer día sin terminar después del último día que terminó
@@ -289,7 +305,7 @@ function vistaSerie() {
         <ol class="lista semanas">${SERIE.semanas.filter(s => s.numero >= t.desde && s.numero <= t.hasta).map(fila).join('')}</ol>`).join('')
     : `<ol class="lista semanas">${SERIE.semanas.map(fila).join('')}</ol>`;
   return `
-    <div class="contenido barra-serie">${barra(T.todasSeries, '../../', T.todasSeries)}</div>
+    <div class="contenido barra-serie">${barra(T.todasSeries, SERIE.inicio || '../../', T.todasSeries)}</div>
     ${SERIE.portada ? `<figure class="portada"><img src="${esc(SERIE.portada.src)}" alt="${esc(SERIE.portada.alt)}" onerror="this.parentNode.hidden=true"></figure>` : ''}
     <div class="contenido">
       <header class="encabezado">
@@ -340,9 +356,9 @@ function vistaSemana() {
         <ol class="lista">${filas}</ol>
       </section>
       <section class="destino">
-        <p class="destino-etiqueta">Al final de la semana</p>
+        <p class="destino-etiqueta">${esc(T.alFinalSemana)}</p>
         <h2 class="destino-titulo">${esc(SERIE.respuesta.titulo)}</h2>
-        <p class="destino-texto">${esc(T.preguntasN(SERIE.preguntas.length))} para conversar con tu grupo sobre lo que Dios te habló esta semana.</p>
+        <p class="destino-texto">${esc(T.destinoTexto(SERIE.preguntas.length))}</p>
         <button class="boton principal" data-accion="ir" data-ruta="${rutaSemana('/grupo')}">${esc(T.verPreguntas)}</button>
       </section>
       <footer class="pie">
@@ -394,7 +410,7 @@ function vistaLectura() {
       <div class="traducciones" role="group" aria-label="${esc(T.traduccion)}">${botones}</div>
       ${vistaMarcador()}
     </div>
-    <p class="trans-nombre">${esc(({NVI: 'Nueva Versión Internacional', NTV: 'Nueva Traducción Viviente', DHH: 'Dios Habla Hoy'})[trad] || trad)}</p>
+    <p class="trans-nombre">${esc(T.nombresTraduccion[trad] || trad)}</p>
     <article class="escritura" id="escritura" data-marcas="${claveMarcas(estado.dia, trad)}">${escritura(p[trad])}</article>
     <ol class="notas-pie" aria-label="${esc(T.notasEnPasaje)}"></ol>
     <p class="guia"><b>${esc(lec.duracion)}</b>${esc(lec.guia)}</p>
@@ -1120,15 +1136,17 @@ function pintar() {
   else window.scrollTo(0, 0);
 }
 function ir(ruta) {
-  const actual = location.hash.slice(1);
+  const actual = rutaActual();
   if (ruta !== 'guia') estado.anterior = '';
   else if (actual !== 'guia') estado.anterior = actual;
   if (actual === ruta) desdeUrl();
-  else location.hash = ruta;
+  else location.hash = aUrl(ruta);
 }
 let turno = 0;
 async function desdeUrl() {
-  const h = location.hash.slice(1), mio = ++turno;
+  const h = rutaActual(), mio = ++turno;
+  // una dirección con las palabras del otro idioma se muestra con las de esta serie
+  if (h && aUrl(h) !== location.hash.slice(1)) { try { history.replaceState(null, '', '#' + aUrl(h)); } catch (e) {} }
   reiniciarSilencio();
   // direcciones de la primera versión (#dia1, #grupo)
   const viejo = h.match(/^dia(\d)$/);
@@ -1195,7 +1213,7 @@ app.addEventListener('click', ev => {
     pintarMarcas(c);
     actualizarMarcador();
     b.parentNode.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
-    const tn = document.querySelector('.trans-nombre'); if (tn) tn.textContent = ({NVI: 'Nueva Versión Internacional', NTV: 'Nueva Traducción Viviente', DHH: 'Dios Habla Hoy'})[t] || t;
+    const tn = document.querySelector('.trans-nombre'); if (tn) tn.textContent = T.nombresTraduccion[t] || t;
   } else if (accion === 'herramienta') {
     limpiarNotasVacias(true);
     estado.herramienta = b.dataset.h !== estado.herramienta ? b.dataset.h : null;

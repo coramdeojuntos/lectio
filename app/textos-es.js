@@ -2,6 +2,8 @@
 window.TEXTOS = {
   idioma: 'es',
   locale: 'es',
+  // nombres completos de las traducciones, sobre el pasaje
+  nombresTraduccion: { NVI: 'Nueva Versión Internacional', NTV: 'Nueva Traducción Viviente', DHH: 'Dios Habla Hoy' },
 
   // navegación
   todasSemanas: 'Todas las semanas',
@@ -63,6 +65,7 @@ window.TEXTOS = {
   copiaLista: 'Copia lista.',
   copiaExplica: 'Se guarda como un archivo para el estudio, no para leerlo. Para recuperar tus notas, ábrelo con «Restaurar una copia».',
   copiaTitulo: 'Copia de mis notas',
+  archivoNotas: 'notas',
   copiaNoValida: 'Ese archivo no es una copia de este estudio.',
   copiaVacia: 'La copia no tiene notas para restaurar.',
   copiaPregunta: fecha => `¿Restaurar la copia del ${fecha}? Lo que tengas aquí para los mismos días se reemplazará.`,
@@ -71,6 +74,8 @@ window.TEXTOS = {
   // semana
   estaSemana: 'Esta semana',
   preguntasN: n => `${n} preguntas`,
+  alFinalSemana: 'Al final de la semana',
+  destinoTexto: n => `${n} preguntas para conversar con tu grupo sobre lo que Dios te habló esta semana.`,
   imprimirSemana: 'Imprimir la semana',
 
   // día
