@@ -4,6 +4,7 @@
 window.SERIE = {
   "clave": "salvacion",
   "idioma": "es",
+  "otroIdioma": {"etiqueta": "English", "idioma": "en", "ruta": "../../en/salvation/"},
   "coleccion": {
     "titulo": "Experimentando a Dios juntos",
     "lema": "Aprender teología meditando y orando la Palabra, en silencio y en comunidad"
